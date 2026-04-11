@@ -1,0 +1,28 @@
+# Secrets
+.env
+
+# Generated data
+chroma_db/
+flashrank_cache/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# OS
+.DS_Store
+.Trash/
+
+# IDE
+.vscode/
+.idea/
+.sixth/
+
+# Misc
+pipeline_diagram.html
