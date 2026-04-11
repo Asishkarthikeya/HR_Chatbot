@@ -87,8 +87,14 @@ st.markdown(f"""
     }}
     .block-container {{ padding-top: 1rem; }}
 
-    /* Apply Garamond globally */
-    * {{ font-family: 'EB Garamond', 'Garamond', 'Georgia', serif !important; }}
+    /* Apply Garamond to content elements only — preserve Streamlit icon fonts */
+    p, span, li, td, th, label, div, h1, h2, h3, h4, h5, h6,
+    button, input, textarea, select, a,
+    [data-testid="stMarkdownContainer"],
+    [data-testid="stChatMessage"],
+    .stButton > button {{
+        font-family: 'EB Garamond', 'Garamond', 'Georgia', serif !important;
+    }}
 
     /* Body text — ICE dark navy */
     p, span, li, td, th, label, div {{ color: {ICE_DARK}; }}
