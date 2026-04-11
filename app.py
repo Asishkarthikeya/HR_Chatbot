@@ -76,13 +76,19 @@ AGENTS = {
 
 st.markdown(f"""
 <style>
-    /* ── Global: white background, ICE brand text ── */
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+    /* ── Global: white background, ICE brand text, Garamond font ── */
     .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"],
     .main, .block-container, [data-testid="stMainBlockContainer"] {{
         background-color: #ffffff !important;
         color: {ICE_DARK} !important;
+        font-family: 'EB Garamond', 'Garamond', 'Georgia', serif !important;
     }}
     .block-container {{ padding-top: 1rem; }}
+
+    /* Apply Garamond globally */
+    * {{ font-family: 'EB Garamond', 'Garamond', 'Georgia', serif !important; }}
 
     /* Body text — ICE dark navy */
     p, span, li, td, th, label, div {{ color: {ICE_DARK}; }}
@@ -521,7 +527,7 @@ def render_dashboard():
         <div style="background:#f0f4f8; border:1.5px solid #d0dde8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#3d5a6e; min-width:100px;"><strong>Admin</strong><br><span style="font-size:0.9em;">Ingest &bull; Test</span></div>
       </div>
       {_ARR}
-      <div style="background:{ICE_DARK}; color:white; padding:12px 20px; border-radius:10px; text-align:center; min-width:150px;"><div style="font-weight:700; font-size:0.85em;">User Query</div><div style="font-size:0.7em; opacity:0.85;">+ Chat History + Agent Selection</div></div>
+      <div style="background:{ICE_TEAL}; color:white; padding:12px 20px; border-radius:10px; text-align:center; min-width:150px;"><div style="font-weight:700; font-size:0.85em;">User Query</div><div style="font-size:0.7em; opacity:0.85;">+ Chat History + Agent Selection</div></div>
     </div>
     {_CONN}
     </div>""", unsafe_allow_html=True)
@@ -530,7 +536,7 @@ def render_dashboard():
     st.markdown(f"""<div style="{_PC}">
     <div style="display:inline-block; background:{ICE_TEAL}; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">2 &mdash; MULTI-AGENT ORCHESTRATION (LANGGRAPH)</div>
     <div style="display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; margin-bottom:16px;">
-      <div style="background:{ICE_DARK}; color:white; padding:10px 18px; border-radius:10px; text-align:center; min-width:110px;"><div style="font-weight:700; font-size:0.82em;">User Query</div></div>
+      <div style="background:{ICE_TEAL}; color:white; padding:10px 18px; border-radius:10px; text-align:center; min-width:110px;"><div style="font-weight:700; font-size:0.82em;">User Query</div></div>
       {_ARR}
       <div style="background:#B71C1C; color:white; padding:10px 18px; border-radius:10px; text-align:center; min-width:160px;"><div style="font-weight:700; font-size:0.82em;">Pre-Routing Guardrail</div><div style="font-size:0.68em; opacity:0.9;">Regex &bull; Injection &bull; Credentials &bull; MNPI</div></div>
       {_ARR}
