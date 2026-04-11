@@ -107,6 +107,25 @@ def intent_detector(state: AgentState) -> AgentState:
     - sensitive_info: Credential/MNPI requests (backup for guardrail)
     - out_of_scope: Non-work topics
     """
+    # ── Greeting detection (runs even with forced_intent) ──
+    # Simple greetings like "hi", "hello", "hey" should always get a
+    # natural response instead of triggering the full RAG pipeline.
+    query_stripped = state["query"].strip().lower()
+    greeting_patterns = re.compile(
+        r"^(hi|hello|hey|howdy|hola|good\s*(morning|afternoon|evening|day)|"
+        r"what'?s\s*up|sup|yo|greetings|namaste|hii+|heyy+|helloo+)[\s!?.,:;)*]*$",
+        re.IGNORECASE,
+    )
+    if greeting_patterns.match(query_stripped):
+        logger.info(f"[Graph] Greeting detected: '{state['query']}' → routing to greeting node")
+        return {
+            **state,
+            "intent": "greeting",
+            "reasoning_trace": state.get("reasoning_trace", []) + [
+                {"step": "CLASSIFY", "detail": "Greeting detected (pattern match, pre-forced-intent)"}
+            ],
+        }
+
     # If a specialist agent was selected in the UI, skip LLM classification
     forced = state.get("forced_intent", "")
     if forced:
