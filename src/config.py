@@ -74,6 +74,7 @@ def _is_skippable_error(error: Exception) -> bool:
         "requests per min", "rpm", "tpm", "overloaded",
         "not_found", "not found", "404", "is not found",
         "model not found", "does not exist", "decommissioned",
+        "connection error", "apiconnectionerror", "timeout", "502", "503", "504"
     ]
     return any(kw in err_str for kw in skip_keywords)
 
