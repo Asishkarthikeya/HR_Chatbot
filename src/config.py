@@ -239,9 +239,9 @@ class _WaterfallLLM:
                     raise
 
         # All models exhausted
-        raise RuntimeError(
-            f"All LLM models are rate limited. Last error: {last_error}. "
-            f"Tried: {[f'{p}:{m}' for p, m in self.model_chain]}"
+        from langchain_core.messages import AIMessage
+        return AIMessage(
+            content="[SYSTEM OVERLOAD: Both Groq and Google Gemini APIs are currently rate-limited. Please wait about 60 seconds before sending another message.]"
         )
 
     def __repr__(self):
