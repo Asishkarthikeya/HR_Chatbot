@@ -1,5 +1,14 @@
-
-
+---
+title: ICE QAgent - HR Onboarding Assistant
+emoji: 🧊
+colorFrom: blue
+colorTo: green
+sdk: streamlit
+sdk_version: "1.35.0"
+app_file: app.py
+pinned: false
+license: mit
+---
 
 # ICE QAgent — Agentic RAG Onboarding Assistant
 
