@@ -500,371 +500,197 @@ def render_dashboard():
     """, unsafe_allow_html=True)
 
     # ── Complete Project Pipeline ────────────────────────────────────
-    st.markdown(f"""
-    <div class="section-header">Complete Project Pipeline</div>
-    <div style="background:#f6fbff; border:1px solid #d0e4f0; border-radius:16px; padding:32px 28px; margin-bottom:28px;">
+    _PB = "background:#f6fbff; border:1px solid #d0e4f0; border-radius:16px; padding:24px 28px; margin-bottom:0; border-bottom:none; border-bottom-left-radius:0; border-bottom-right-radius:0;"
+    _PC = "background:#f6fbff; border:1px solid #d0e4f0; border-left:1px solid #d0e4f0; border-right:1px solid #d0e4f0; border-top:none; border-bottom:none; padding:0 28px 24px 28px;"
+    _PE = "background:#f6fbff; border:1px solid #d0e4f0; border-radius:16px; border-top:none; border-top-left-radius:0; border-top-right-radius:0; padding:0 28px 28px 28px; margin-bottom:28px;"
+    _CONN = '<div style="text-align:center; color:#8aa4b8; font-size:1.5em; margin:4px 0 8px 0;">&#9660;</div>'
+    _ARR = '<div style="color:#8aa4b8; font-size:1.5em; padding:0 8px;">&#10142;</div>'
+    _ARR_S = '<div style="color:#8aa4b8; font-size:1.3em; padding:0 5px;">&#10142;</div>'
 
-      <!-- ── SECTION 1: User Interface Layer ── -->
-      <div style="margin-bottom:24px;">
-        <div style="display:inline-block; background:#C17A28; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">1 &mdash; USER INTERFACE LAYER</div>
-        <div style="display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;">
-          <div style="background:{ICE_TEAL}; color:white; padding:12px 20px; border-radius:10px; text-align:center; min-width:150px;">
-            <div style="font-weight:700; font-size:0.85em;">Streamlit Frontend</div>
-            <div style="font-size:0.7em; opacity:0.85;">Dashboard &bull; Chat &bull; Admin</div>
-          </div>
-          <div style="color:#8aa4b8; font-size:1.5em; padding:0 10px;">&#10142;</div>
-          <div style="display:flex; gap:8px;">
-            <div style="background:#f0f4f8; border:1.5px solid #d0dde8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#3d5a6e; min-width:100px;">
-              <strong>Dashboard</strong><br><span style="font-size:0.9em;">Pipeline &bull; Agents</span>
-            </div>
-            <div style="background:#f0f4f8; border:1.5px solid #d0dde8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#3d5a6e; min-width:100px;">
-              <strong>Chat</strong><br><span style="font-size:0.9em;">Master &bull; Specialist</span>
-            </div>
-            <div style="background:#f0f4f8; border:1.5px solid #d0dde8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#3d5a6e; min-width:100px;">
-              <strong>Admin</strong><br><span style="font-size:0.9em;">Ingest &bull; Test</span>
-            </div>
-          </div>
-          <div style="color:#8aa4b8; font-size:1.5em; padding:0 10px;">&#10142;</div>
-          <div style="background:{ICE_DARK}; color:white; padding:12px 20px; border-radius:10px; text-align:center; min-width:150px;">
-            <div style="font-weight:700; font-size:0.85em;">User Query</div>
-            <div style="font-size:0.7em; opacity:0.85;">+ Chat History + Agent Selection</div>
-          </div>
-        </div>
+    st.markdown(f'<div class="section-header">Complete Project Pipeline</div>', unsafe_allow_html=True)
+
+    # Section 1: User Interface Layer
+    st.markdown(f"""<div style="{_PB}">
+    <div style="display:inline-block; background:#C17A28; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">1 &mdash; USER INTERFACE LAYER</div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;">
+      <div style="background:{ICE_TEAL}; color:white; padding:12px 20px; border-radius:10px; text-align:center; min-width:150px;"><div style="font-weight:700; font-size:0.85em;">Streamlit Frontend</div><div style="font-size:0.7em; opacity:0.85;">Dashboard &bull; Chat &bull; Admin</div></div>
+      {_ARR}
+      <div style="display:flex; gap:8px;">
+        <div style="background:#f0f4f8; border:1.5px solid #d0dde8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#3d5a6e; min-width:100px;"><strong>Dashboard</strong><br><span style="font-size:0.9em;">Pipeline &bull; Agents</span></div>
+        <div style="background:#f0f4f8; border:1.5px solid #d0dde8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#3d5a6e; min-width:100px;"><strong>Chat</strong><br><span style="font-size:0.9em;">Master &bull; Specialist</span></div>
+        <div style="background:#f0f4f8; border:1.5px solid #d0dde8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#3d5a6e; min-width:100px;"><strong>Admin</strong><br><span style="font-size:0.9em;">Ingest &bull; Test</span></div>
       </div>
-
-      <!-- Connector -->
-      <div style="text-align:center; color:#8aa4b8; font-size:1.5em; margin:4px 0 8px 0;">&#9660;</div>
-
-      <!-- ── SECTION 2: Multi-Agent Orchestration ── -->
-      <div style="margin-bottom:24px;">
-        <div style="display:inline-block; background:{ICE_TEAL}; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">2 &mdash; MULTI-AGENT ORCHESTRATION (LANGGRAPH)</div>
-
-        <div style="display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; margin-bottom:16px;">
-          <div style="background:{ICE_DARK}; color:white; padding:10px 18px; border-radius:10px; text-align:center; min-width:110px; position:relative;">
-            <div style="position:absolute; top:-8px; left:-8px; width:20px; height:20px; border-radius:50%; background:{ICE_TEAL}; color:white; font-size:0.65em; font-weight:700; display:flex; align-items:center; justify-content:center;">A</div>
-            <div style="font-weight:700; font-size:0.82em;">User Query</div>
-          </div>
-          <div style="color:#8aa4b8; font-size:1.5em; padding:0 8px;">&#10142;</div>
-          <div style="background:#B71C1C; color:white; padding:10px 18px; border-radius:10px; text-align:center; min-width:160px; position:relative;">
-            <div style="position:absolute; top:-8px; left:-8px; width:20px; height:20px; border-radius:50%; background:#B71C1C; color:white; font-size:0.65em; font-weight:700; display:flex; align-items:center; justify-content:center;">B</div>
-            <div style="font-weight:700; font-size:0.82em;">Pre-Routing Guardrail</div>
-            <div style="font-size:0.68em; opacity:0.9;">Regex &bull; Injection &bull; Credentials &bull; MNPI</div>
-          </div>
-          <div style="color:#8aa4b8; font-size:1.5em; padding:0 8px;">&#10142;</div>
-          <div style="text-align:center;">
-            <div style="background:#fde8e8; border:1.5px solid #e8a8a8; color:#7a1a1a; padding:6px 12px; border-radius:6px; font-size:0.72em; font-weight:700;">BLOCKED?</div>
-            <div style="font-size:0.65em; font-weight:600; margin-top:3px;">
-              <span style="color:#C62828;">Yes → END</span> &nbsp;
-              <span style="color:#2E8B57;">No ↓</span>
-            </div>
-          </div>
-          <div style="color:#8aa4b8; font-size:1.5em; padding:0 8px;">&#10142;</div>
-          <div style="background:#d4eaf7; border:2px solid #a8d4ed; color:#1a4a5c; padding:10px 18px; border-radius:10px; text-align:center; min-width:180px; position:relative;">
-            <div style="position:absolute; top:-8px; left:-8px; width:20px; height:20px; border-radius:50%; background:#1a6080; color:white; font-size:0.65em; font-weight:700; display:flex; align-items:center; justify-content:center;">C</div>
-            <div style="font-weight:700; font-size:0.82em;">Intent Agent</div>
-            <div style="font-size:0.68em;">LLM Classification + Agent Switch Detection</div>
-          </div>
-        </div>
-
-        <!-- Fan-out to 3 agents -->
-        <div style="text-align:center; color:#8aa4b8; font-size:1.2em; margin-bottom:8px;">&#9660; &nbsp; &#9660; &nbsp; &#9660;</div>
-        <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
-          <div style="background:#2E8B57; color:white; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;">
-            <div style="font-weight:700; font-size:0.85em;">HR &amp; Onboarding Agent</div>
-            <div style="font-size:0.68em; opacity:0.9;">hr_general &bull; greeting &bull; out_of_scope</div>
-          </div>
-          <div style="background:#e0f2fc; border:2px solid #71C5E8; color:#1a6080; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;">
-            <div style="font-weight:700; font-size:0.85em;">QA Expert Agent</div>
-            <div style="font-size:0.68em;">qa_technical</div>
-          </div>
-          <div style="background:#C62828; color:white; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;">
-            <div style="font-weight:700; font-size:0.85em;">Security Guardrail</div>
-            <div style="font-size:0.68em; opacity:0.9;">sensitive_info</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Connector -->
-      <div style="text-align:center; color:#8aa4b8; font-size:1.5em; margin:4px 0 8px 0;">&#9660;</div>
-
-      <!-- ── SECTION 3: Specialist Agents (ReAct) ── -->
-      <div style="margin-bottom:24px;">
-        <div style="display:inline-block; background:#1a4a5c; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">3 &mdash; SPECIALIST AGENTS (REACT REASONING)</div>
-
-        <div style="display:flex; gap:14px; flex-wrap:wrap;">
-          <!-- QA Agent Card -->
-          <div style="flex:1; min-width:240px; background:#f0f9fd; border:2px solid #71C5E8; border-radius:12px; padding:16px;">
-            <div style="font-weight:700; font-size:0.85em; color:#1a6080; margin-bottom:6px;">&#128295; QA Expert Agent</div>
-            <div style="font-size:0.7em; color:#3d7a9a; margin-bottom:8px;">Flexible RAG + Web Fallback</div>
-            <div style="font-size:0.68em; color:#1a6080; line-height:1.7;">
-              &#8226; <strong>search_internal_docs()</strong> — RAG on qa_docs<br>
-              &#8226; <strong>evaluate_relevance()</strong> — LLM-as-Judge<br>
-              &#8226; <strong>search_web()</strong> — Tavily fallback<br>
-              &#8226; <strong>synthesize()</strong> — Cited answer
-            </div>
-            <div style="font-size:0.62em; color:#5a8aa0; margin-top:8px; border-top:1px solid #d0e8f0; padding-top:6px;">
-              <strong>Persona:</strong> Senior QA engineer &bull; <strong>Web:</strong> Yes (Tavily)
-            </div>
-          </div>
-
-          <!-- HR Agent Card -->
-          <div style="flex:1; min-width:240px; background:#f0f9f2; border:2px solid #4CAF50; border-radius:12px; padding:16px;">
-            <div style="font-weight:700; font-size:0.85em; color:#2E7D32; margin-bottom:6px;">&#128075; HR &amp; Onboarding Agent</div>
-            <div style="font-size:0.7em; color:#3d7a3d; margin-bottom:8px;">Strict RAG Only — No Web Search</div>
-            <div style="font-size:0.68em; color:#2E7D32; line-height:1.7;">
-              &#8226; <strong>check_sensitivity()</strong> — Sensitive topics<br>
-              &#8226; <strong>search_hr_docs()</strong> — RAG on hr_docs<br>
-              &#8226; <strong>assess_confidence()</strong> — LLM relevance<br>
-              &#8226; <strong>extract_citations()</strong> — Source refs
-            </div>
-            <div style="font-size:0.62em; color:#4a8a4a; margin-top:8px; border-top:1px solid #c8e0c8; padding-top:6px;">
-              <strong>Persona:</strong> Nova (HR colleague) &bull; <strong>Escalation:</strong> Jessica Martinez
-            </div>
-          </div>
-
-          <!-- Security Card -->
-          <div style="flex:1; min-width:240px; background:#fef5f5; border:2px solid #EF5350; border-radius:12px; padding:16px;">
-            <div style="font-weight:700; font-size:0.85em; color:#C62828; margin-bottom:6px;">&#128737; Security Guardrail</div>
-            <div style="font-size:0.7em; color:#9a3d3d; margin-bottom:8px;">Pattern-Based Defense in Depth</div>
-            <div style="font-size:0.68em; color:#C62828; line-height:1.7;">
-              &#8226; <strong>CREDENTIAL_PATTERNS</strong> — 8 regex<br>
-              &#8226; <strong>DATABASE_PATTERNS</strong> — 4 regex<br>
-              &#8226; <strong>MNPI_PATTERNS</strong> — 5 regex<br>
-              &#8226; <strong>INJECTION_PATTERNS</strong> — 7 regex
-            </div>
-            <div style="font-size:0.62em; color:#8a4a4a; margin-top:8px; border-top:1px solid #e0c0c0; padding-top:6px;">
-              <strong>Levels:</strong> CRITICAL &bull; HIGH &bull; MEDIUM &bull; LOW &bull; <strong>Audit:</strong> Logged
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Connector -->
-      <div style="text-align:center; color:#8aa4b8; font-size:1.5em; margin:4px 0 8px 0;">&#9660;</div>
-
-      <!-- ── SECTION 4: RAG Pipeline ── -->
-      <div style="margin-bottom:24px;">
-        <div style="display:inline-block; background:#1a4a5c; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">4 &mdash; RETRIEVAL-AUGMENTED GENERATION (RAG) PIPELINE</div>
-
-        <div style="display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;">
-          <div style="background:#f0e6f6; border:1.5px solid #d4b8e8; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#5a2d78; min-width:95px; position:relative;">
-            <div style="position:absolute; top:-7px; left:-7px; width:18px; height:18px; border-radius:50%; background:#7B3FA0; color:white; font-size:0.6em; font-weight:700; display:flex; align-items:center; justify-content:center;">1</div>
-            <strong>LLM Query<br>Expansion</strong><br><span style="font-size:0.85em;">Colloquial → Formal</span>
-          </div>
-          <div style="color:#8aa4b8; font-size:1.3em; padding:0 5px;">&#10142;</div>
-          <div style="background:#e8f4f8; border:1.5px solid #b0d8e8; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#1a4a5c; min-width:95px; position:relative;">
-            <div style="position:absolute; top:-7px; left:-7px; width:18px; height:18px; border-radius:50%; background:{ICE_TEAL}; color:white; font-size:0.6em; font-weight:700; display:flex; align-items:center; justify-content:center;">2</div>
-            <strong>Semantic<br>Search</strong><br><span style="font-size:0.85em;">ChromaDB + MiniLM</span>
-          </div>
-          <div style="color:#8aa4b8; font-size:1.3em; padding:0 5px;">&#10142;</div>
-          <div style="background:#fef0e0; border:1.5px solid #f0c990; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#8a4c14; min-width:95px; position:relative;">
-            <div style="position:absolute; top:-7px; left:-7px; width:18px; height:18px; border-radius:50%; background:#C17A28; color:white; font-size:0.6em; font-weight:700; display:flex; align-items:center; justify-content:center;">3</div>
-            <strong>Keyword<br>Boost</strong><br><span style="font-size:0.85em;">Hybrid Scoring</span>
-          </div>
-          <div style="color:#8aa4b8; font-size:1.3em; padding:0 5px;">&#10142;</div>
-          <div style="background:#e8f4f8; border:1.5px solid #b0d8e8; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#1a4a5c; min-width:95px; position:relative;">
-            <div style="position:absolute; top:-7px; left:-7px; width:18px; height:18px; border-radius:50%; background:{ICE_TEAL}; color:white; font-size:0.6em; font-weight:700; display:flex; align-items:center; justify-content:center;">4</div>
-            <strong>Cross-Encoder<br>Re-Rank</strong><br><span style="font-size:0.85em;">ms-marco-MiniLM</span>
-          </div>
-          <div style="color:#8aa4b8; font-size:1.3em; padding:0 5px;">&#10142;</div>
-          <div style="background:#f0e6f6; border:1.5px solid #d4b8e8; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#5a2d78; min-width:95px; position:relative;">
-            <div style="position:absolute; top:-7px; left:-7px; width:18px; height:18px; border-radius:50%; background:#7B3FA0; color:white; font-size:0.6em; font-weight:700; display:flex; align-items:center; justify-content:center;">5</div>
-            <strong>LLM-as-Judge<br>Relevance</strong><br><span style="font-size:0.85em;">Confidence Check</span>
-          </div>
-          <div style="color:#8aa4b8; font-size:1.3em; padding:0 5px;">&#10142;</div>
-          <div style="background:#e0f2e9; border:1.5px solid #a8d4b8; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#1a5c3a; min-width:95px; position:relative;">
-            <div style="position:absolute; top:-7px; left:-7px; width:18px; height:18px; border-radius:50%; background:#2E8B57; color:white; font-size:0.6em; font-weight:700; display:flex; align-items:center; justify-content:center;">6</div>
-            <strong>ReAct<br>Synthesis</strong><br><span style="font-size:0.85em;">Cited Answer</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Connector -->
-      <div style="text-align:center; color:#8aa4b8; font-size:1.5em; margin:4px 0 8px 0;">&#9660;</div>
-
-      <!-- ── SECTION 5: Data & Knowledge Sources ── -->
-      <div style="margin-bottom:24px;">
-        <div style="display:inline-block; background:#2E8B57; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">5 &mdash; DATA &amp; KNOWLEDGE SOURCES</div>
-
-        <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
-          <div style="flex:1; min-width:200px; max-width:280px; background:#e0f2e9; border:1.5px solid #a8d4b8; border-radius:10px; padding:14px; text-align:center;">
-            <div style="font-weight:700; font-size:0.78em; color:#2E7D32; margin-bottom:6px;">&#128218; HR Docs Collection</div>
-            <div style="font-size:0.68em; color:#3d6a3d; text-align:left; padding-left:8px; line-height:1.5;">
-              Employee Handbook 2024<br>QA Onboarding Checklist<br>Atlanta Office Info &amp; Equipment<br>Code of Conduct &amp; MNPI Policy
-            </div>
-            <div style="margin-top:6px;">
-              <span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.6em; font-weight:600; background:#d0e8d0; color:#2E7D32;">~55 chunks</span>
-              <span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.6em; font-weight:600; background:#d0e8d0; color:#2E7D32;">4 docs</span>
-            </div>
-          </div>
-          <div style="flex:1; min-width:200px; max-width:280px; background:#e8f4f8; border:1.5px solid #b0d8e8; border-radius:10px; padding:14px; text-align:center;">
-            <div style="font-weight:700; font-size:0.78em; color:#1a5070; margin-bottom:6px;">&#128295; QA Docs Collection</div>
-            <div style="font-size:0.68em; color:#3d6a80; text-align:left; padding-left:8px; line-height:1.5;">
-              Automation Standards (Playwright)<br>Test Environment Guide<br>QA Team Structure &amp; Processes<br>API &amp; FIX Protocol Testing<br>Deployment Pipeline (CI/CD)
-            </div>
-            <div style="margin-top:6px;">
-              <span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.6em; font-weight:600; background:#d0e0e8; color:#1a5070;">~90 chunks</span>
-              <span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.6em; font-weight:600; background:#d0e0e8; color:#1a5070;">6 docs</span>
-            </div>
-          </div>
-          <div style="flex:1; min-width:200px; max-width:240px; background:#fef0e0; border:1.5px solid #f0c990; border-radius:10px; padding:14px; text-align:center;">
-            <div style="font-weight:700; font-size:0.78em; color:#8a4c14; margin-bottom:6px;">&#127760; Tavily Web Search</div>
-            <div style="font-size:0.68em; color:#8a6030; text-align:left; padding-left:8px; line-height:1.5;">
-              Fallback for QA Agent only<br>General technical questions<br>Playwright docs, pytest patterns
-            </div>
-            <div style="margin-top:6px;">
-              <span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.6em; font-weight:600; background:#f0e0c8; color:#8a4c14;">3 results max</span>
-              <span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.6em; font-weight:600; background:#f0e0c8; color:#8a4c14;">AI summary</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Connector -->
-      <div style="text-align:center; color:#8aa4b8; font-size:1.5em; margin:4px 0 8px 0;">&#9660;</div>
-
-      <!-- ── SECTION 6: LLM Infrastructure ── -->
-      <div style="margin-bottom:24px;">
-        <div style="display:inline-block; background:#7B3FA0; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">6 &mdash; LLM INFRASTRUCTURE (WATERFALL FALLBACK)</div>
-
-        <div style="display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;">
-          <!-- Gemini -->
-          <div style="flex:1; min-width:180px;">
-            <div style="font-weight:700; font-size:0.75em; color:#7B3FA0; margin-bottom:8px; text-align:center;">Primary: Google Gemini</div>
-            <div style="display:flex; flex-direction:column; gap:4px;">
-              <div style="background:#f0e6f6; border:1px solid #d4b8e8; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#5a2d78;"><strong>gemini-2.0-flash</strong> <span style="opacity:0.6;">← Default</span></div>
-              <div style="background:#f0e6f6; border:1px solid #d4b8e8; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#5a2d78;"><strong>gemini-2.0-flash-lite</strong></div>
-              <div style="background:#f0e6f6; border:1px solid #d4b8e8; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#5a2d78;"><strong>gemini-2.5-flash-preview</strong></div>
-              <div style="background:#f0e6f6; border:1px solid #d4b8e8; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#5a2d78;"><strong>gemini-2.5-pro-preview</strong></div>
-              <div style="background:#f0e6f6; border:1px solid #d4b8e8; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#5a2d78;"><strong>gemini-1.5-flash</strong></div>
-              <div style="background:#f0e6f6; border:1px solid #d4b8e8; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#5a2d78;"><strong>gemini-1.5-pro</strong></div>
-            </div>
-          </div>
-
-          <!-- Fallback arrow -->
-          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding-top:50px;">
-            <div style="font-size:0.62em; font-weight:600; color:#C62828;">Rate Limited?</div>
-            <div style="color:#C62828; font-size:1.5em;">&#10142;</div>
-            <div style="font-size:0.62em; font-weight:600; color:#C62828;">429 / 404</div>
-          </div>
-
-          <!-- Groq -->
-          <div style="flex:1; min-width:180px;">
-            <div style="font-weight:700; font-size:0.75em; color:#E67E22; margin-bottom:8px; text-align:center;">Secondary: Groq (Llama)</div>
-            <div style="display:flex; flex-direction:column; gap:4px;">
-              <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>llama-3.3-70b-versatile</strong> <span style="opacity:0.6;">← Primary</span></div>
-              <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>llama-3.1-8b-instant</strong></div>
-              <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>llama-3.2-90b-vision</strong></div>
-              <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>mixtral-8x7b-32768</strong></div>
-              <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>gemma2-9b-it</strong></div>
-            </div>
-          </div>
-
-          <!-- Error handling -->
-          <div style="flex:0.8; min-width:160px;">
-            <div style="font-weight:700; font-size:0.75em; color:#C62828; margin-bottom:8px; text-align:center;">Error Detection</div>
-            <div style="background:#fde8e8; border:1.5px solid #e8a8a8; border-radius:8px; padding:12px; font-size:0.65em; color:#7a1a1a; line-height:1.7;">
-              <strong>Skippable (→ next):</strong><br>
-              &bull; 429 Rate Limit<br>
-              &bull; Quota Exhausted<br>
-              &bull; 404 Model Not Found<br>
-              &bull; TPM / RPM Exceeded<br><br>
-              <strong>Fatal (→ raise):</strong><br>
-              &bull; Auth Failure<br>
-              &bull; Malformed Request
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Connector -->
-      <div style="text-align:center; color:#8aa4b8; font-size:1.5em; margin:4px 0 8px 0;">&#9660;</div>
-
-      <!-- ── SECTION 7: Embedding & Vector Store ── -->
-      <div style="margin-bottom:24px;">
-        <div style="display:inline-block; background:#4A7C8A; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">7 &mdash; EMBEDDING, VECTOR STORE &amp; INGESTION</div>
-
-        <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
-          <!-- Ingestion Pipeline -->
-          <div style="flex:1; min-width:400px;">
-            <div style="font-weight:700; font-size:0.75em; color:{ICE_TEAL}; margin-bottom:10px;">Document Ingestion Pipeline</div>
-            <div style="display:flex; align-items:center; justify-content:flex-start; gap:0; flex-wrap:wrap;">
-              <div style="background:#f0f4f8; border:1.5px solid #d0dde8; padding:8px 12px; border-radius:6px; font-size:0.68em; text-align:center; color:#3d5a6e;">
-                <strong>Markdown<br>Files</strong><br><span style="font-size:0.85em;">.md format</span>
-              </div>
-              <div style="color:#8aa4b8; font-size:1.2em; padding:0 6px;">&#10142;</div>
-              <div style="background:#e8f4f8; border:1.5px solid #b0d8e8; padding:8px 12px; border-radius:6px; font-size:0.68em; text-align:center; color:#1a4a5c;">
-                <strong>Recursive<br>Chunker</strong><br><span style="font-size:0.85em;">600 tok / 100 overlap</span>
-              </div>
-              <div style="color:#8aa4b8; font-size:1.2em; padding:0 6px;">&#10142;</div>
-              <div style="background:#f0e6f6; border:1.5px solid #d4b8e8; padding:8px 12px; border-radius:6px; font-size:0.68em; text-align:center; color:#5a2d78;">
-                <strong>Embed</strong><br><span style="font-size:0.85em;">all-MiniLM-L6-v2<br>384-dim vectors</span>
-              </div>
-              <div style="color:#8aa4b8; font-size:1.2em; padding:0 6px;">&#10142;</div>
-              <div style="background:{ICE_TEAL}; color:white; padding:8px 12px; border-radius:6px; font-size:0.68em; text-align:center;">
-                <strong>ChromaDB</strong><br><span style="font-size:0.85em; opacity:0.9;">Persistent SQLite</span>
-              </div>
-            </div>
-            <div style="font-size:0.6em; color:#7a94a8; margin-top:8px;"><strong>Chunk Separators:</strong> ## Headers → ### Sub → Bullets → Paragraphs → Lines → Words</div>
-          </div>
-
-          <!-- Models -->
-          <div style="flex:0.4; min-width:180px;">
-            <div style="font-weight:700; font-size:0.75em; color:{ICE_TEAL}; margin-bottom:10px;">Models</div>
-            <div style="background:#e8f4f8; border:1.5px solid #b0d8e8; border-radius:8px; padding:12px; font-size:0.65em; color:#1a4a5c; line-height:1.7;">
-              <strong>Bi-Encoder (Embed):</strong><br>
-              all-MiniLM-L6-v2<br>
-              384-dim &bull; 22MB &bull; Local<br><br>
-              <strong>Cross-Encoder (Rerank):</strong><br>
-              ms-marco-MiniLM-L-12-v2<br>
-              FlashRank &bull; Cached locally
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Connector -->
-      <div style="text-align:center; color:#8aa4b8; font-size:1.5em; margin:4px 0 8px 0;">&#9660;</div>
-
-      <!-- ── SECTION 8: Response Rendering ── -->
-      <div style="background:linear-gradient(135deg, {ICE_TEAL} 0%, #1a4a5c 100%); border-radius:12px; padding:20px; color:white;">
-        <div style="display:inline-block; background:rgba(255,255,255,0.2); color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">8 &mdash; RESPONSE RENDERING</div>
-        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-          <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:10px 14px; text-align:center; min-width:100px;">
-            <div style="font-size:1.1em; margin-bottom:2px;">&#127991;</div>
-            <div style="font-weight:700; font-size:0.72em;">Agent Badge</div>
-            <div style="font-size:0.6em; opacity:0.8;">Which agent handled</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:10px 14px; text-align:center; min-width:100px;">
-            <div style="font-size:1.1em; margin-bottom:2px;">&#128202;</div>
-            <div style="font-weight:700; font-size:0.72em;">Confidence</div>
-            <div style="font-size:0.6em; opacity:0.8;">High / Med / Low</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:10px 14px; text-align:center; min-width:100px;">
-            <div style="font-size:1.1em; margin-bottom:2px;">&#128172;</div>
-            <div style="font-weight:700; font-size:0.72em;">Response</div>
-            <div style="font-size:0.6em; opacity:0.8;">Markdown text</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:10px 14px; text-align:center; min-width:100px;">
-            <div style="font-size:1.1em; margin-bottom:2px;">&#128279;</div>
-            <div style="font-weight:700; font-size:0.72em;">Sources</div>
-            <div style="font-size:0.6em; opacity:0.8;">Docs + scores</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:10px 14px; text-align:center; min-width:100px;">
-            <div style="font-size:1.1em; margin-bottom:2px;">&#129504;</div>
-            <div style="font-weight:700; font-size:0.72em;">Reasoning</div>
-            <div style="font-size:0.6em; opacity:0.8;">THINK→ACT→OBSERVE</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:10px 14px; text-align:center; min-width:100px;">
-            <div style="font-size:1.1em; margin-bottom:2px;">&#128736;</div>
-            <div style="font-weight:700; font-size:0.72em;">Tool Calls</div>
-            <div style="font-size:0.6em; opacity:0.8;">Tools invoked</div>
-          </div>
-        </div>
-      </div>
-
+      {_ARR}
+      <div style="background:{ICE_DARK}; color:white; padding:12px 20px; border-radius:10px; text-align:center; min-width:150px;"><div style="font-weight:700; font-size:0.85em;">User Query</div><div style="font-size:0.7em; opacity:0.85;">+ Chat History + Agent Selection</div></div>
     </div>
-    """, unsafe_allow_html=True)
+    {_CONN}
+    </div>""", unsafe_allow_html=True)
+
+    # Section 2: Multi-Agent Orchestration
+    st.markdown(f"""<div style="{_PC}">
+    <div style="display:inline-block; background:{ICE_TEAL}; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">2 &mdash; MULTI-AGENT ORCHESTRATION (LANGGRAPH)</div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; margin-bottom:16px;">
+      <div style="background:{ICE_DARK}; color:white; padding:10px 18px; border-radius:10px; text-align:center; min-width:110px;"><div style="font-weight:700; font-size:0.82em;">User Query</div></div>
+      {_ARR}
+      <div style="background:#B71C1C; color:white; padding:10px 18px; border-radius:10px; text-align:center; min-width:160px;"><div style="font-weight:700; font-size:0.82em;">Pre-Routing Guardrail</div><div style="font-size:0.68em; opacity:0.9;">Regex &bull; Injection &bull; Credentials &bull; MNPI</div></div>
+      {_ARR}
+      <div style="text-align:center;"><div style="background:#fde8e8; border:1.5px solid #e8a8a8; color:#7a1a1a; padding:6px 12px; border-radius:6px; font-size:0.72em; font-weight:700;">BLOCKED?</div><div style="font-size:0.65em; font-weight:600; margin-top:3px;"><span style="color:#C62828;">Yes → END</span> &nbsp; <span style="color:#2E8B57;">No ↓</span></div></div>
+      {_ARR}
+      <div style="background:#d4eaf7; border:2px solid #a8d4ed; color:#1a4a5c; padding:10px 18px; border-radius:10px; text-align:center; min-width:180px;"><div style="font-weight:700; font-size:0.82em;">Intent Agent</div><div style="font-size:0.68em;">LLM Classification + Agent Switch Detection</div></div>
+    </div>
+    <div style="text-align:center; color:#8aa4b8; font-size:1.2em; margin-bottom:8px;">&#9660; &nbsp; &#9660; &nbsp; &#9660;</div>
+    <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+      <div style="background:#2E8B57; color:white; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;"><div style="font-weight:700; font-size:0.85em;">HR &amp; Onboarding Agent</div><div style="font-size:0.68em; opacity:0.9;">hr_general &bull; greeting &bull; out_of_scope</div></div>
+      <div style="background:#e0f2fc; border:2px solid #71C5E8; color:#1a6080; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;"><div style="font-weight:700; font-size:0.85em;">QA Expert Agent</div><div style="font-size:0.68em;">qa_technical</div></div>
+      <div style="background:#C62828; color:white; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;"><div style="font-weight:700; font-size:0.85em;">Security Guardrail</div><div style="font-size:0.68em; opacity:0.9;">sensitive_info</div></div>
+    </div>
+    {_CONN}
+    </div>""", unsafe_allow_html=True)
+
+    # Section 3: Specialist Agents
+    st.markdown(f"""<div style="{_PC}">
+    <div style="display:inline-block; background:#1a4a5c; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">3 &mdash; SPECIALIST AGENTS (REACT REASONING)</div>
+    <div style="display:flex; gap:14px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:240px; background:#f0f9fd; border:2px solid #71C5E8; border-radius:12px; padding:16px;">
+        <div style="font-weight:700; font-size:0.85em; color:#1a6080; margin-bottom:6px;">&#128295; QA Expert Agent</div>
+        <div style="font-size:0.7em; color:#3d7a9a; margin-bottom:8px;">Flexible RAG + Web Fallback</div>
+        <div style="font-size:0.68em; color:#1a6080; line-height:1.7;">&#8226; <strong>search_internal_docs()</strong> — RAG on qa_docs<br>&#8226; <strong>evaluate_relevance()</strong> — LLM-as-Judge<br>&#8226; <strong>search_web()</strong> — Tavily fallback<br>&#8226; <strong>synthesize()</strong> — Cited answer</div>
+        <div style="font-size:0.62em; color:#5a8aa0; margin-top:8px; border-top:1px solid #d0e8f0; padding-top:6px;"><strong>Persona:</strong> Senior QA engineer &bull; <strong>Web:</strong> Yes (Tavily)</div>
+      </div>
+      <div style="flex:1; min-width:240px; background:#f0f9f2; border:2px solid #4CAF50; border-radius:12px; padding:16px;">
+        <div style="font-weight:700; font-size:0.85em; color:#2E7D32; margin-bottom:6px;">&#128075; HR &amp; Onboarding Agent</div>
+        <div style="font-size:0.7em; color:#3d7a3d; margin-bottom:8px;">Strict RAG Only — No Web Search</div>
+        <div style="font-size:0.68em; color:#2E7D32; line-height:1.7;">&#8226; <strong>check_sensitivity()</strong> — Sensitive topics<br>&#8226; <strong>search_hr_docs()</strong> — RAG on hr_docs<br>&#8226; <strong>assess_confidence()</strong> — LLM relevance<br>&#8226; <strong>extract_citations()</strong> — Source refs</div>
+        <div style="font-size:0.62em; color:#4a8a4a; margin-top:8px; border-top:1px solid #c8e0c8; padding-top:6px;"><strong>Persona:</strong> Nova (HR colleague) &bull; <strong>Escalation:</strong> Jessica Martinez</div>
+      </div>
+      <div style="flex:1; min-width:240px; background:#fef5f5; border:2px solid #EF5350; border-radius:12px; padding:16px;">
+        <div style="font-weight:700; font-size:0.85em; color:#C62828; margin-bottom:6px;">&#128737; Security Guardrail</div>
+        <div style="font-size:0.7em; color:#9a3d3d; margin-bottom:8px;">Pattern-Based Defense in Depth</div>
+        <div style="font-size:0.68em; color:#C62828; line-height:1.7;">&#8226; <strong>CREDENTIAL_PATTERNS</strong> — 8 regex<br>&#8226; <strong>DATABASE_PATTERNS</strong> — 4 regex<br>&#8226; <strong>MNPI_PATTERNS</strong> — 5 regex<br>&#8226; <strong>INJECTION_PATTERNS</strong> — 7 regex</div>
+        <div style="font-size:0.62em; color:#8a4a4a; margin-top:8px; border-top:1px solid #e0c0c0; padding-top:6px;"><strong>Levels:</strong> CRITICAL &bull; HIGH &bull; MEDIUM &bull; LOW &bull; <strong>Audit:</strong> Logged</div>
+      </div>
+    </div>
+    {_CONN}
+    </div>""", unsafe_allow_html=True)
+
+    # Section 4: RAG Pipeline
+    st.markdown(f"""<div style="{_PC}">
+    <div style="display:inline-block; background:#1a4a5c; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">4 &mdash; RETRIEVAL-AUGMENTED GENERATION (RAG) PIPELINE</div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;">
+      <div style="background:#f0e6f6; border:1.5px solid #d4b8e8; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#5a2d78; min-width:95px;"><strong>LLM Query<br>Expansion</strong><br><span style="font-size:0.85em;">Colloquial → Formal</span></div>
+      {_ARR_S}
+      <div style="background:#e8f4f8; border:1.5px solid #b0d8e8; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#1a4a5c; min-width:95px;"><strong>Semantic<br>Search</strong><br><span style="font-size:0.85em;">ChromaDB + MiniLM</span></div>
+      {_ARR_S}
+      <div style="background:#fef0e0; border:1.5px solid #f0c990; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#8a4c14; min-width:95px;"><strong>Keyword<br>Boost</strong><br><span style="font-size:0.85em;">Hybrid Scoring</span></div>
+      {_ARR_S}
+      <div style="background:#e8f4f8; border:1.5px solid #b0d8e8; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#1a4a5c; min-width:95px;"><strong>Cross-Encoder<br>Re-Rank</strong><br><span style="font-size:0.85em;">ms-marco-MiniLM</span></div>
+      {_ARR_S}
+      <div style="background:#f0e6f6; border:1.5px solid #d4b8e8; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#5a2d78; min-width:95px;"><strong>LLM-as-Judge<br>Relevance</strong><br><span style="font-size:0.85em;">Confidence Check</span></div>
+      {_ARR_S}
+      <div style="background:#e0f2e9; border:1.5px solid #a8d4b8; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#1a5c3a; min-width:95px;"><strong>ReAct<br>Synthesis</strong><br><span style="font-size:0.85em;">Cited Answer</span></div>
+    </div>
+    {_CONN}
+    </div>""", unsafe_allow_html=True)
+
+    # Section 5: Data Sources
+    st.markdown(f"""<div style="{_PC}">
+    <div style="display:inline-block; background:#2E8B57; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">5 &mdash; DATA &amp; KNOWLEDGE SOURCES</div>
+    <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+      <div style="flex:1; min-width:200px; max-width:280px; background:#e0f2e9; border:1.5px solid #a8d4b8; border-radius:10px; padding:14px; text-align:center;">
+        <div style="font-weight:700; font-size:0.78em; color:#2E7D32; margin-bottom:6px;">&#128218; HR Docs Collection</div>
+        <div style="font-size:0.68em; color:#3d6a3d; text-align:left; padding-left:8px; line-height:1.5;">Employee Handbook 2024<br>QA Onboarding Checklist<br>Atlanta Office Info &amp; Equipment<br>Code of Conduct &amp; MNPI Policy</div>
+        <div style="margin-top:6px;"><span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.6em; font-weight:600; background:#d0e8d0; color:#2E7D32;">~55 chunks</span> <span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.6em; font-weight:600; background:#d0e8d0; color:#2E7D32;">4 docs</span></div>
+      </div>
+      <div style="flex:1; min-width:200px; max-width:280px; background:#e8f4f8; border:1.5px solid #b0d8e8; border-radius:10px; padding:14px; text-align:center;">
+        <div style="font-weight:700; font-size:0.78em; color:#1a5070; margin-bottom:6px;">&#128295; QA Docs Collection</div>
+        <div style="font-size:0.68em; color:#3d6a80; text-align:left; padding-left:8px; line-height:1.5;">Automation Standards (Playwright)<br>Test Environment Guide<br>QA Team Structure &amp; Processes<br>API &amp; FIX Protocol Testing<br>Deployment Pipeline (CI/CD)</div>
+        <div style="margin-top:6px;"><span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.6em; font-weight:600; background:#d0e0e8; color:#1a5070;">~90 chunks</span> <span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.6em; font-weight:600; background:#d0e0e8; color:#1a5070;">6 docs</span></div>
+      </div>
+      <div style="flex:1; min-width:200px; max-width:240px; background:#fef0e0; border:1.5px solid #f0c990; border-radius:10px; padding:14px; text-align:center;">
+        <div style="font-weight:700; font-size:0.78em; color:#8a4c14; margin-bottom:6px;">&#127760; Tavily Web Search</div>
+        <div style="font-size:0.68em; color:#8a6030; text-align:left; padding-left:8px; line-height:1.5;">Fallback for QA Agent only<br>General technical questions<br>Playwright docs, pytest patterns</div>
+        <div style="margin-top:6px;"><span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.6em; font-weight:600; background:#f0e0c8; color:#8a4c14;">3 results max</span> <span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:0.6em; font-weight:600; background:#f0e0c8; color:#8a4c14;">AI summary</span></div>
+      </div>
+    </div>
+    {_CONN}
+    </div>""", unsafe_allow_html=True)
+
+    # Section 6: LLM Infrastructure
+    st.markdown(f"""<div style="{_PC}">
+    <div style="display:inline-block; background:#7B3FA0; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">6 &mdash; LLM INFRASTRUCTURE (WATERFALL FALLBACK)</div>
+    <div style="display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;">
+      <div style="flex:1; min-width:180px;">
+        <div style="font-weight:700; font-size:0.75em; color:#7B3FA0; margin-bottom:8px; text-align:center;">Primary: Google Gemini</div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div style="background:#f0e6f6; border:1px solid #d4b8e8; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#5a2d78;"><strong>gemini-2.0-flash</strong> <span style="opacity:0.6;">← Default</span></div>
+          <div style="background:#f0e6f6; border:1px solid #d4b8e8; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#5a2d78;"><strong>gemini-2.0-flash-lite</strong></div>
+          <div style="background:#f0e6f6; border:1px solid #d4b8e8; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#5a2d78;"><strong>gemini-2.5-flash-preview</strong></div>
+          <div style="background:#f0e6f6; border:1px solid #d4b8e8; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#5a2d78;"><strong>gemini-2.5-pro-preview</strong></div>
+          <div style="background:#f0e6f6; border:1px solid #d4b8e8; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#5a2d78;"><strong>gemini-1.5-flash</strong></div>
+          <div style="background:#f0e6f6; border:1px solid #d4b8e8; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#5a2d78;"><strong>gemini-1.5-pro</strong></div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding-top:50px;">
+        <div style="font-size:0.62em; font-weight:600; color:#C62828;">Rate Limited?</div>
+        <div style="color:#C62828; font-size:1.5em;">&#10142;</div>
+        <div style="font-size:0.62em; font-weight:600; color:#C62828;">429 / 404</div>
+      </div>
+      <div style="flex:1; min-width:180px;">
+        <div style="font-weight:700; font-size:0.75em; color:#E67E22; margin-bottom:8px; text-align:center;">Secondary: Groq (Llama)</div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>llama-3.3-70b-versatile</strong> <span style="opacity:0.6;">← Primary</span></div>
+          <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>llama-3.1-8b-instant</strong></div>
+          <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>llama-3.2-90b-vision</strong></div>
+          <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>mixtral-8x7b-32768</strong></div>
+          <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>gemma2-9b-it</strong></div>
+        </div>
+      </div>
+      <div style="flex:0.8; min-width:160px;">
+        <div style="font-weight:700; font-size:0.75em; color:#C62828; margin-bottom:8px; text-align:center;">Error Detection</div>
+        <div style="background:#fde8e8; border:1.5px solid #e8a8a8; border-radius:8px; padding:12px; font-size:0.65em; color:#7a1a1a; line-height:1.7;"><strong>Skippable (→ next):</strong><br>&bull; 429 Rate Limit<br>&bull; Quota Exhausted<br>&bull; 404 Model Not Found<br>&bull; TPM / RPM Exceeded<br><br><strong>Fatal (→ raise):</strong><br>&bull; Auth Failure<br>&bull; Malformed Request</div>
+      </div>
+    </div>
+    {_CONN}
+    </div>""", unsafe_allow_html=True)
+
+    # Section 7: Embedding & Vector Store
+    st.markdown(f"""<div style="{_PC}">
+    <div style="display:inline-block; background:#4A7C8A; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">7 &mdash; EMBEDDING, VECTOR STORE &amp; INGESTION</div>
+    <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+      <div style="flex:1; min-width:400px;">
+        <div style="font-weight:700; font-size:0.75em; color:{ICE_TEAL}; margin-bottom:10px;">Document Ingestion Pipeline</div>
+        <div style="display:flex; align-items:center; justify-content:flex-start; gap:0; flex-wrap:wrap;">
+          <div style="background:#f0f4f8; border:1.5px solid #d0dde8; padding:8px 12px; border-radius:6px; font-size:0.68em; text-align:center; color:#3d5a6e;"><strong>Markdown<br>Files</strong><br><span style="font-size:0.85em;">.md format</span></div>
+          <div style="color:#8aa4b8; font-size:1.2em; padding:0 6px;">&#10142;</div>
+          <div style="background:#e8f4f8; border:1.5px solid #b0d8e8; padding:8px 12px; border-radius:6px; font-size:0.68em; text-align:center; color:#1a4a5c;"><strong>Recursive<br>Chunker</strong><br><span style="font-size:0.85em;">600 tok / 100 overlap</span></div>
+          <div style="color:#8aa4b8; font-size:1.2em; padding:0 6px;">&#10142;</div>
+          <div style="background:#f0e6f6; border:1.5px solid #d4b8e8; padding:8px 12px; border-radius:6px; font-size:0.68em; text-align:center; color:#5a2d78;"><strong>Embed</strong><br><span style="font-size:0.85em;">all-MiniLM-L6-v2<br>384-dim vectors</span></div>
+          <div style="color:#8aa4b8; font-size:1.2em; padding:0 6px;">&#10142;</div>
+          <div style="background:{ICE_TEAL}; color:white; padding:8px 12px; border-radius:6px; font-size:0.68em; text-align:center;"><strong>ChromaDB</strong><br><span style="font-size:0.85em; opacity:0.9;">Persistent SQLite</span></div>
+        </div>
+      </div>
+      <div style="flex:0.4; min-width:180px;">
+        <div style="font-weight:700; font-size:0.75em; color:{ICE_TEAL}; margin-bottom:10px;">Models</div>
+        <div style="background:#e8f4f8; border:1.5px solid #b0d8e8; border-radius:8px; padding:12px; font-size:0.65em; color:#1a4a5c; line-height:1.7;"><strong>Bi-Encoder (Embed):</strong><br>all-MiniLM-L6-v2<br>384-dim &bull; 22MB &bull; Local<br><br><strong>Cross-Encoder (Rerank):</strong><br>ms-marco-MiniLM-L-12-v2<br>FlashRank &bull; Cached locally</div>
+      </div>
+    </div>
+    {_CONN}
+    </div>""", unsafe_allow_html=True)
+
+    # Section 8: Response Rendering
+    st.markdown(f"""<div style="{_PE}">
+    <div style="background:linear-gradient(135deg, {ICE_TEAL} 0%, #1a4a5c 100%); border-radius:12px; padding:20px; color:white;">
+      <div style="display:inline-block; background:rgba(255,255,255,0.2); color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">8 &mdash; RESPONSE RENDERING</div>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:10px 14px; text-align:center; min-width:100px;"><div style="font-size:1.1em; margin-bottom:2px;">&#127991;</div><div style="font-weight:700; font-size:0.72em;">Agent Badge</div><div style="font-size:0.6em; opacity:0.8;">Which agent handled</div></div>
+        <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:10px 14px; text-align:center; min-width:100px;"><div style="font-size:1.1em; margin-bottom:2px;">&#128202;</div><div style="font-weight:700; font-size:0.72em;">Confidence</div><div style="font-size:0.6em; opacity:0.8;">High / Med / Low</div></div>
+        <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:10px 14px; text-align:center; min-width:100px;"><div style="font-size:1.1em; margin-bottom:2px;">&#128172;</div><div style="font-weight:700; font-size:0.72em;">Response</div><div style="font-size:0.6em; opacity:0.8;">Markdown text</div></div>
+        <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:10px 14px; text-align:center; min-width:100px;"><div style="font-size:1.1em; margin-bottom:2px;">&#128279;</div><div style="font-weight:700; font-size:0.72em;">Sources</div><div style="font-size:0.6em; opacity:0.8;">Docs + scores</div></div>
+        <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:10px 14px; text-align:center; min-width:100px;"><div style="font-size:1.1em; margin-bottom:2px;">&#129504;</div><div style="font-weight:700; font-size:0.72em;">Reasoning</div><div style="font-size:0.6em; opacity:0.8;">THINK→ACT→OBSERVE</div></div>
+        <div style="background:rgba(255,255,255,0.12); border-radius:8px; padding:10px 14px; text-align:center; min-width:100px;"><div style="font-size:1.1em; margin-bottom:2px;">&#128736;</div><div style="font-weight:700; font-size:0.72em;">Tool Calls</div><div style="font-size:0.6em; opacity:0.8;">Tools invoked</div></div>
+      </div>
+    </div>
+    </div>""", unsafe_allow_html=True)
 
     # ── Information Security Levels ──────────────────────────────────
     st.markdown(f"""
