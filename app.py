@@ -87,13 +87,22 @@ st.markdown(f"""
     }}
     .block-container {{ padding-top: 1rem; }}
 
-    /* Apply Garamond to content elements only — preserve Streamlit icon fonts */
-    p, span, li, td, th, label, div, h1, h2, h3, h4, h5, h6,
+    /* Apply Garamond to content elements — preserve Streamlit Material Symbols icons */
+    p, li, td, th, label, h1, h2, h3, h4, h5, h6,
     button, input, textarea, select, a,
-    [data-testid="stMarkdownContainer"],
-    [data-testid="stChatMessage"],
+    [data-testid="stMarkdownContainer"] p,
+    [data-testid="stMarkdownContainer"] span,
+    [data-testid="stMarkdownContainer"] li,
+    [data-testid="stChatMessage"] p,
     .stButton > button {{
         font-family: 'EB Garamond', 'Garamond', 'Georgia', serif !important;
+    }}
+    /* Restore Material Symbols for Streamlit icons (avatars, expander arrows, etc.) */
+    .material-symbols-rounded,
+    [data-testid*="Avatar"] span,
+    [data-testid="stExpander"] summary span:first-child,
+    [data-testid="stExpanderToggleIcon"] {{
+        font-family: 'Material Symbols Rounded' !important;
     }}
 
     /* Body text — ICE dark navy */
