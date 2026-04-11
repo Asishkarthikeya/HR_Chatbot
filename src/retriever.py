@@ -1,4 +1,5 @@
-"""Advanced retrieval pipeline with LLM-powered query expansion, hybrid search, and cross-encoder re-ranking."""
+"""Advanced retrieval pipeline with conversation-aware query reformulation,
+LLM-powered query expansion, hybrid search, and cross-encoder re-ranking."""
 
 import re
 import logging
@@ -43,6 +44,105 @@ def get_vectorstore(collection_name: str):
         embedding_function=embeddings,
     )
 
+
+# ── Conversation-Aware Query Reformulation ─────────────────────────────
+
+def _looks_like_followup(query: str) -> bool:
+    """Detect if a query looks like a follow-up that needs context from prior messages.
+    
+    Follow-up indicators:
+    - Very short query (under 8 words)
+    - Contains pronouns/references: "it", "that", "those", "they", "this"
+    - Starts with "what about", "how about", "and", "but", "also"
+    - Contains comparative words: "same", "similar", "different", "instead"
+    """
+    query_lower = query.lower().strip()
+    words = query_lower.split()
+    
+    # Short queries are more likely follow-ups
+    is_short = len(words) <= 8
+    
+    # Follow-up signal words
+    followup_starters = [
+        "what about", "how about", "and ", "but ", "also ", "or ",
+        "what if", "same for", "how does that", "is that", "does that",
+        "can i also", "what else", "anything else", "tell me more",
+    ]
+    starts_with_followup = any(query_lower.startswith(s) for s in followup_starters)
+    
+    # Pronouns that reference prior context
+    context_pronouns = {"it", "that", "those", "they", "this", "them", "its", "their"}
+    has_pronouns = bool(context_pronouns.intersection(set(words)))
+    
+    # Comparative/continuation words
+    continuation_words = {"same", "similar", "different", "instead", "other", "another", "else", "too"}
+    has_continuation = bool(continuation_words.intersection(set(words)))
+    
+    return starts_with_followup or (is_short and (has_pronouns or has_continuation))
+
+
+def reformulate_query(query: str, chat_history: list) -> str:
+    """Reformulate a follow-up query into a self-contained search query using chat history.
+    
+    This is the KEY feature for conversation-aware retrieval. Without it, a follow-up
+    like "what about for remote workers?" would search for those exact words instead
+    of "PTO policy for remote workers at ICE".
+    
+    Only triggers when the query looks like a follow-up (short, contains pronouns, etc.).
+    For standalone queries, returns the original query unchanged.
+    
+    Args:
+        query: The user's current message
+        chat_history: List of previous messages [{"role": "user"/"assistant", "content": "..."}]
+    
+    Returns:
+        Reformulated self-contained query string
+    """
+    # If no chat history or query doesn't look like a follow-up, skip reformulation
+    if not chat_history or not _looks_like_followup(query):
+        return query
+    
+    try:
+        llm = _get_llm()
+        
+        # Build recent conversation context (last 3-4 messages)
+        recent = chat_history[-4:]
+        history_text = "\n".join(
+            f"{'User' if msg['role'] == 'user' else 'Assistant'}: {msg['content'][:300]}"
+            for msg in recent
+        )
+        
+        reformulation_prompt = (
+            "You are a search query reformulator. Given a conversation and a follow-up question, "
+            "rewrite the follow-up as a SELF-CONTAINED search query that can be understood without "
+            "the conversation context.\n\n"
+            "Rules:\n"
+            "- Include the key topic/subject from the conversation in the reformulated query\n"
+            "- Keep it concise (under 15 words)\n"
+            "- Do NOT answer the question — just reformulate it\n"
+            "- Output ONLY the reformulated query, nothing else\n\n"
+            f"Conversation:\n{history_text}\n\n"
+            f"Follow-up question: {query}\n\n"
+            f"Reformulated search query:"
+        )
+        
+        response = llm.invoke(reformulation_prompt)
+        reformulated = response.content.strip().strip('"').strip("'")
+        
+        # Sanity check: don't use reformulation if it's too long or empty
+        if reformulated and len(reformulated) < 200 and len(reformulated) > 3:
+            logger.info(f"[Retriever] Query reformulated: '{query}' → '{reformulated}'")
+            return reformulated
+        
+        logger.warning(f"[Retriever] Reformulation produced invalid result, using original query")
+        return query
+        
+    except Exception as e:
+        logger.warning(f"[Retriever] Query reformulation failed: {e}, using original query")
+        return query
+
+
+# ── Query Expansion ────────────────────────────────────────────────────
 
 def expand_query_with_llm(query: str) -> list[str]:
     """Use the LLM to generate better search queries from colloquial user input.
@@ -140,22 +240,26 @@ def rerank_documents(query: str, documents: list, top_k: int = None) -> list:
     return result
 
 
-def retrieve(query: str, collection_name: str, top_k: int = None) -> list:
+def retrieve(query: str, collection_name: str, top_k: int = None, chat_history: list = None) -> list:
     """Full retrieval pipeline:
-    1. LLM-powered query expansion (translates colloquial → formal terms)
-    2. Semantic search across all query variations (deduplicated)
-    3. Keyword overlap boost (hybrid scoring)
-    4. Cross-encoder re-ranking (ms-marco for final precision)
+    1. Conversation-aware query reformulation (for follow-up questions)
+    2. LLM-powered query expansion (translates colloquial → formal terms)
+    3. Semantic search across all query variations (deduplicated)
+    4. Keyword overlap boost (hybrid scoring)
+    5. Cross-encoder re-ranking (ms-marco for final precision)
 
     Returns list of (Document, score) tuples, ranked by relevance.
     """
     if top_k is None:
         top_k = RETRIEVAL_TOP_K
 
+    # Step 0: Conversation-aware reformulation (KEY FEATURE)
+    search_query = reformulate_query(query, chat_history or [])
+    
     vectorstore = get_vectorstore(collection_name)
 
-    # Step 1: LLM-powered query expansion
-    queries = expand_query_with_llm(query)
+    # Step 1: LLM-powered query expansion (on the reformulated query)
+    queries = expand_query_with_llm(search_query)
 
     # Step 2: Semantic search across all query variations (deduplicate by content)
     seen_content = set()
@@ -174,11 +278,11 @@ def retrieve(query: str, collection_name: str, top_k: int = None) -> list:
         return []
 
     # Step 3: Hybrid boost — keyword overlap scoring
-    hybrid_results = keyword_filter(query, all_results)
+    hybrid_results = keyword_filter(search_query, all_results)
 
     # Step 4: Cross-encoder re-ranking using the BEST expanded query
     # Use the expanded formal query for re-ranking (better match than colloquial)
-    rerank_query = queries[1] if len(queries) > 1 else query
+    rerank_query = queries[1] if len(queries) > 1 else search_query
     reranked = rerank_documents(rerank_query, hybrid_results, top_k=top_k)
 
     return reranked

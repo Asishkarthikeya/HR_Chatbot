@@ -1,4 +1,5 @@
 import os
+import time
 import logging
 from dotenv import load_dotenv
 
@@ -45,27 +46,20 @@ SIMILARITY_THRESHOLD = 0.3
 GEMINI_MODELS = [
     "gemini-2.0-flash",
     "gemini-2.0-flash-lite",
-    "gemini-2.5-flash-preview-05-20",
-    "gemini-2.5-pro-preview-05-06",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
 ]
 
 GROQ_MODELS = [
     "llama-3.3-70b-versatile",
     "llama-3.1-8b-instant",
-    "llama-3.2-90b-vision-preview",
-    "llama-3.2-11b-vision-preview",
-    "llama-3.2-3b-preview",
-    "llama-3.2-1b-preview",
-    "mixtral-8x7b-32768",
-    "gemma2-9b-it",
+    "meta-llama/llama-4-scout-17b-16e-instruct",
+    "qwen/qwen3-32b",
 ]
 
 # Track which provider is currently active (can switch at runtime)
 _active_provider = LLM_PROVIDER
 _active_model = GOOGLE_MODEL if LLM_PROVIDER == "google" else GROQ_MODEL
-_failed_models = set()  # Models that hit rate limits this session
+_failed_models: dict[str, float] = {}  # model_key -> timestamp of failure
+_FAIL_COOLDOWN = 60  # seconds before retrying a failed model
 
 
 def _is_skippable_error(error: Exception) -> bool:
@@ -79,7 +73,7 @@ def _is_skippable_error(error: Exception) -> bool:
         "resourceexhausted", "too many requests", "tokens per min",
         "requests per min", "rpm", "tpm", "overloaded",
         "not_found", "not found", "404", "is not found",
-        "model not found", "does not exist",
+        "model not found", "does not exist", "decommissioned",
     ]
     return any(kw in err_str for kw in skip_keywords)
 
@@ -130,10 +124,10 @@ def get_llm_with_fallback():
 
     Fallback chain (if LLM_PROVIDER=google):
       gemini-2.0-flash → gemini-1.5-flash → gemini-1.5-pro
-        → llama-3.3-70b → llama-3.1-8b → mixtral-8x7b
+        → llama-3.3-70b → llama-3.1-8b
 
     Fallback chain (if LLM_PROVIDER=groq):
-      llama-3.3-70b → llama-3.1-8b → mixtral-8x7b
+      llama-3.3-70b → llama-3.1-8b
         → gemini-2.0-flash → gemini-1.5-flash → gemini-1.5-pro
 
     Returns a wrapper that auto-retries on rate limit errors.
@@ -152,7 +146,13 @@ def get_llm_with_fallback():
             + [("google", m) for m in GEMINI_MODELS]
         )
 
-    # Skip already-failed models, but keep them at the end as last resort
+    # Expire old failures so models get retried after cooldown
+    now = time.time()
+    expired = [k for k, t in _failed_models.items() if now - t > _FAIL_COOLDOWN]
+    for k in expired:
+        del _failed_models[k]
+
+    # Skip recently-failed models, but keep them at the end as last resort
     available = [m for m in model_chain if f"{m[0]}:{m[1]}" not in _failed_models]
     failed = [m for m in model_chain if f"{m[0]}:{m[1]}" in _failed_models]
     ordered = available + failed
@@ -223,12 +223,15 @@ class _WaterfallLLM:
 
             except Exception as e:
                 if _is_skippable_error(e):
-                    _failed_models.add(key)
+                    _failed_models[key] = time.time()
                     logger.warning(
-                        f"[Waterfall LLM] Rate limited on {key}: {str(e)[:100]}. "
+                        f"[Waterfall LLM] {key} failed: {str(e)[:120]}. "
                         f"Falling back to next model..."
                     )
                     last_error = e
+                    # Brief pause before trying next model to avoid
+                    # burning through rate limits on all models instantly
+                    time.sleep(1)
                     continue
                 else:
                     # Non-rate-limit error — don't swallow it

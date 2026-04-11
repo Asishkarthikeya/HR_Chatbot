@@ -197,7 +197,7 @@ def qa_agent_node(state: AgentState) -> AgentState:
 
     llm = get_llm()
     agent = QAExpertAgent(llm)
-    result = agent.run(state["query"])
+    result = agent.run(state["query"], chat_history=state.get("chat_history", []))
 
     return {
         **state,
@@ -217,7 +217,7 @@ def hr_agent_node(state: AgentState) -> AgentState:
 
     llm = get_llm()
     agent = HROnboardingAgent(llm)
-    result = agent.run(state["query"])
+    result = agent.run(state["query"], chat_history=state.get("chat_history", []))
 
     return {
         **state,

@@ -30,12 +30,14 @@ class QAExpertAgent:
     - search_internal_docs: Query the ICE QA knowledge base
     - search_web: Fall back to Tavily for general technical questions
     - evaluate_relevance: Score whether retrieved docs answer the query
+    - validate_answer: Self-check the generated answer against sources
     """
 
     def __init__(self, llm):
         self.llm = llm
         self.tool_calls = []  # Track tool usage for transparency
         self.reasoning_trace = []  # Track reasoning steps
+        self.chat_history = []  # Conversation context for follow-up queries
 
     def _log_step(self, step_type: str, detail: str):
         """Record a reasoning step for the agent trace."""
@@ -54,7 +56,7 @@ class QAExpertAgent:
         self._log_step("TOOL_CALL", f"search_internal_docs('{query}')")
         self.tool_calls.append({"tool": "search_internal_docs", "input": query})
 
-        results = retrieve(query, QA_COLLECTION_NAME, top_k=RETRIEVAL_TOP_K)
+        results = retrieve(query, QA_COLLECTION_NAME, top_k=RETRIEVAL_TOP_K, chat_history=self.chat_history)
 
         documents = []
         for doc, score in results:
@@ -184,18 +186,65 @@ class QAExpertAgent:
         self._log_step("TOOL_RESULT", f"Verdict: {result['verdict']} ({result['confidence']:.2f})")
         return result
 
+    # ── Tool 4: Answer Validation ─────────────────────────────────────
+
+    def validate_answer(self, answer: str, sources: list) -> dict:
+        """Self-check the generated answer against source documents.
+        
+        Catches hallucinations by asking the LLM to verify that all factual
+        claims in the answer are supported by the provided sources.
+        """
+        self._log_step("TOOL_CALL", "validate_answer()")
+        self.tool_calls.append({"tool": "validate_answer", "input": "self_check"})
+
+        if not sources:
+            return {"valid": True, "issue": None}
+
+        source_text = "\n---\n".join(s.get("content", "")[:300] for s in sources[:3])
+        
+        validation_prompt = (
+            f"You are a fact-checker. Check if the following answer contains any "
+            f"factual claims NOT supported by the source documents.\n\n"
+            f"Answer:\n{answer[:500]}\n\n"
+            f"Source documents:\n{source_text}\n\n"
+            f"Does the answer contain any unsupported claims (fabricated dates, "
+            f"dollar amounts, names, or procedures not in the sources)?\n"
+            f"Answer ONLY 'yes' or 'no'. If yes, briefly state the issue."
+        )
+
+        try:
+            response = self.llm.invoke(validation_prompt)
+            result_text = response.content.strip().lower()
+            has_issue = result_text.startswith("yes")
+            
+            result = {
+                "valid": not has_issue,
+                "issue": response.content.strip() if has_issue else None,
+            }
+            self._log_step(
+                "TOOL_RESULT",
+                f"Validation: {'PASS' if result['valid'] else 'ISSUE DETECTED: ' + str(result['issue'][:100])}"
+            )
+            return result
+        except Exception as e:
+            self._log_step("TOOL_ERROR", f"Validation failed: {e}")
+            return {"valid": True, "issue": None}
+
     # ── ReAct Execution Loop ──────────────────────────────────────────
 
-    def run(self, query: str) -> dict:
+    def run(self, query: str, chat_history: list = None) -> dict:
         """Execute the QA agent's ReAct loop.
 
         Reasoning flow:
         1. THINK  → Analyze the query
-        2. ACT    → Search internal knowledge base
+        2. ACT    → Search internal knowledge base (with conversation context)
         3. OBSERVE → Evaluate retrieval quality
         4. ACT    → (If needed) Fall back to web search
-        5. RESPOND → Synthesize final answer with citations
+        5. ACT    → Generate answer
+        6. VALIDATE → Self-check answer against sources
+        7. RESPOND → Return final answer with citations
         """
+        self.chat_history = chat_history or []
         self._log_step("THINK", f"Analyzing query: '{query}'")
 
         # ── Step 1: Search internal QA documentation ──
@@ -270,6 +319,26 @@ class QAExpertAgent:
             {"role": "user", "content": query},
         ]
         response = self.llm.invoke(messages)
+        answer = response.content
+
+        # ── Step 5: Answer self-validation ──
+        self._log_step("VALIDATE", "Self-checking answer against source documents...")
+        validation = self.validate_answer(answer, sources)
+
+        if not validation["valid"]:
+            # Re-generate with stricter grounding instructions
+            self._log_step("ACT", "Re-generating answer with stricter grounding (validation failed)...")
+            messages.append({"role": "assistant", "content": answer})
+            messages.append({
+                "role": "user",
+                "content": (
+                    "Your previous answer may contain information not from the source documents. "
+                    "Please regenerate, using ONLY facts explicitly stated in the provided documentation. "
+                    "If you're unsure about something, say so rather than guessing."
+                ),
+            })
+            response = self.llm.invoke(messages)
+            answer = response.content
 
         # Calculate overall confidence
         if sources:
@@ -280,11 +349,12 @@ class QAExpertAgent:
         self._log_step(
             "RESPOND",
             f"Answer generated | Confidence: {confidence:.2f} | "
-            f"Sources: {len(sources)} | Web search: {used_web_search}",
+            f"Sources: {len(sources)} | Web search: {used_web_search} | "
+            f"Validation: {'PASS' if validation['valid'] else 'RE-GENERATED'}",
         )
 
         return {
-            "response": response.content,
+            "response": answer,
             "agent": "QA Expert Agent",
             "sources": sources,
             "used_web_search": used_web_search,

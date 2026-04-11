@@ -55,6 +55,7 @@ class HROnboardingAgent:
         self.llm = llm
         self.tool_calls = []
         self.reasoning_trace = []
+        self.chat_history = []  # Conversation context for follow-up queries
 
     def _log_step(self, step_type: str, detail: str):
         entry = {"step": step_type, "detail": detail}
@@ -72,7 +73,7 @@ class HROnboardingAgent:
         self._log_step("TOOL_CALL", f"search_hr_docs('{query}')")
         self.tool_calls.append({"tool": "search_hr_docs", "input": query})
 
-        results = retrieve(query, HR_COLLECTION_NAME, top_k=RETRIEVAL_TOP_K)
+        results = retrieve(query, HR_COLLECTION_NAME, top_k=RETRIEVAL_TOP_K, chat_history=self.chat_history)
 
         documents = []
         for doc, score in results:
@@ -232,19 +233,67 @@ class HROnboardingAgent:
         self._log_step("TOOL_RESULT", f"Extracted {len(citations)} unique citations")
         return citations
 
+    # ── Tool 5: Answer Validation ─────────────────────────────────────
+
+    def validate_answer(self, answer: str, sources: list) -> dict:
+        """Self-check the generated answer against source documents.
+        
+        Catches hallucinations by verifying all factual claims in the answer
+        are supported by the HR documentation. Critical for HR accuracy —
+        wrong PTO days, enrollment deadlines, or policy details could mislead employees.
+        """
+        self._log_step("TOOL_CALL", "validate_answer()")
+        self.tool_calls.append({"tool": "validate_answer", "input": "self_check"})
+
+        if not sources:
+            return {"valid": True, "issue": None}
+
+        source_text = "\n---\n".join(s.get("content", "")[:300] for s in sources[:3])
+        
+        validation_prompt = (
+            f"You are a fact-checker for HR information. Check if the following answer contains any "
+            f"factual claims NOT supported by the source documents.\n\n"
+            f"Answer:\n{answer[:500]}\n\n"
+            f"Source documents:\n{source_text}\n\n"
+            f"Does the answer contain any unsupported claims (wrong PTO days, "
+            f"incorrect dollar amounts, fabricated deadlines, wrong contact info)?\n"
+            f"Answer ONLY 'yes' or 'no'. If yes, briefly state the issue."
+        )
+
+        try:
+            response = self.llm.invoke(validation_prompt)
+            result_text = response.content.strip().lower()
+            has_issue = result_text.startswith("yes")
+            
+            result = {
+                "valid": not has_issue,
+                "issue": response.content.strip() if has_issue else None,
+            }
+            self._log_step(
+                "TOOL_RESULT",
+                f"Validation: {'PASS' if result['valid'] else 'ISSUE DETECTED: ' + str(result['issue'][:100])}"
+            )
+            return result
+        except Exception as e:
+            self._log_step("TOOL_ERROR", f"Validation failed: {e}")
+            return {"valid": True, "issue": None}
+
     # ── ReAct Execution Loop ──────────────────────────────────────────
 
-    def run(self, query: str) -> dict:
+    def run(self, query: str, chat_history: list = None) -> dict:
         """Execute the HR agent's ReAct loop.
 
         Reasoning flow:
         1. THINK    → Analyze the query for HR relevance
         2. ACT      → Check if query touches sensitive HR topics
-        3. ACT      → Search internal HR knowledge base
+        3. ACT      → Search internal HR knowledge base (with conversation context)
         4. OBSERVE  → Assess confidence in retrieved results
         5. ACT      → Extract citations (if confident) OR escalate to human
-        6. RESPOND  → Synthesize answer with appropriate caveats
+        6. ACT      → Synthesize answer
+        7. VALIDATE → Self-check answer against sources
+        8. RESPOND  → Return final answer
         """
+        self.chat_history = chat_history or []
         self._log_step("THINK", f"Analyzing HR query: '{query}'")
 
         # ── Step 1: Sensitivity screening ──
@@ -301,21 +350,42 @@ class HROnboardingAgent:
             {"role": "user", "content": query},
         ]
         response = self.llm.invoke(messages)
+        answer = response.content
 
+        # ── Step 7: Answer self-validation ──
         # Format sources for the UI
         sources = [
             {"name": c["display"], "content": c["content"], "score": c["score"]}
             for c in citations
         ]
 
+        self._log_step("VALIDATE", "Self-checking answer against source documents...")
+        validation = self.validate_answer(answer, sources)
+
+        if not validation["valid"]:
+            # Re-generate with stricter grounding instructions
+            self._log_step("ACT", "Re-generating answer with stricter grounding (validation failed)...")
+            messages.append({"role": "assistant", "content": answer})
+            messages.append({
+                "role": "user",
+                "content": (
+                    "Your previous answer may contain HR information not from our official documentation. "
+                    "Please regenerate, using ONLY facts explicitly stated in the provided ICE HR documents. "
+                    "If you're unsure about a detail (dates, amounts, procedures), say so rather than guessing."
+                ),
+            })
+            response = self.llm.invoke(messages)
+            answer = response.content
+
         self._log_step(
             "RESPOND",
             f"Answer generated | Confidence: {confidence['score']:.2f} | "
-            f"Sources: {len(sources)} | Sensitive: {sensitivity['is_sensitive']}",
+            f"Sources: {len(sources)} | Sensitive: {sensitivity['is_sensitive']} | "
+            f"Validation: {'PASS' if validation['valid'] else 'RE-GENERATED'}",
         )
 
         return {
-            "response": response.content,
+            "response": answer,
             "agent": "HR & Onboarding Agent",
             "sources": sources,
             "used_web_search": False,

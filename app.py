@@ -430,7 +430,8 @@ def render_response(result: dict):
     st.markdown(html, unsafe_allow_html=True)
 
     # Response text
-    st.markdown(result.get("response", ""))
+    # Falls back to 'content' because messages saved to history use the content key
+    st.markdown(result.get("response", result.get("content", "")))
 
     # Web search notice
     if result.get("used_web_search"):
@@ -662,13 +663,12 @@ def render_dashboard():
           <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>llama-3.3-70b-versatile</strong> <span style="opacity:0.6;">← Primary</span></div>
           <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>llama-3.1-8b-instant</strong></div>
           <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>llama-3.2-90b-vision</strong></div>
-          <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>mixtral-8x7b-32768</strong></div>
           <div style="background:#fef0e0; border:1px solid #f0c990; padding:6px 12px; border-radius:6px; font-size:0.68em; color:#8a4c14;"><strong>gemma2-9b-it</strong></div>
         </div>
       </div>
       <div style="flex:0.8; min-width:160px;">
         <div style="font-weight:700; font-size:0.75em; color:#C62828; margin-bottom:8px; text-align:center;">Error Detection</div>
-        <div style="background:#fde8e8; border:1.5px solid #e8a8a8; border-radius:8px; padding:12px; font-size:0.65em; color:#7a1a1a; line-height:1.7;"><strong>Skippable (→ next):</strong><br>&bull; 429 Rate Limit<br>&bull; Quota Exhausted<br>&bull; 404 Model Not Found<br>&bull; TPM / RPM Exceeded<br><br><strong>Fatal (→ raise):</strong><br>&bull; Auth Failure<br>&bull; Malformed Request</div>
+        <div style="background:#fde8e8; border:1.5px solid #e8a8a8; border-radius:8px; padding:12px; font-size:0.65em; color:#7a1a1a; line-height:1.7;"><strong>Skippable (→ next):</strong><br>&bull; 429 Rate Limit<br>&bull; Quota Exhausted<br>&bull; 404 Model Not Found<br>&bull; Model Decommissioned<br>&bull; TPM / RPM Exceeded<br><br><strong>Fatal (→ raise):</strong><br>&bull; Auth Failure<br>&bull; Malformed Request</div>
       </div>
     </div>
     {_CONN}

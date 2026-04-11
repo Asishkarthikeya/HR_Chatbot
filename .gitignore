@@ -24,5 +24,8 @@ venv/
 .idea/
 .sixth/
 
+# Cache
+.context_cache/
+
 # Misc
 pipeline_diagram.html

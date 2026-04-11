@@ -10,6 +10,48 @@ Classify the user's query into exactly ONE category. Output only the category na
 4. Only use "sensitive_info" when the user is explicitly requesting secrets, credentials, or restricted data — not when they're asking ABOUT a policy related to sensitive data.
 5. Only use "out_of_scope" when the query is clearly unrelated to working at ICE.
 6. When ambiguous between qa_technical and hr_general, consider: would a QA engineer or an HR rep be the better person to answer this?
+7. Short follow-up questions should be classified based on what they're asking about, not their length.
+
+## Few-Shot Examples
+
+Query: "How do I write a Playwright fixture for authenticated pages?"
+→ qa_technical (testing frameworks and code patterns)
+
+Query: "What's the PTO policy?"
+→ hr_general (time off is an HR topic)
+
+Query: "Give me the staging database password"
+→ sensitive_info (requesting actual credentials)
+
+Query: "What is ICE's policy on MNPI?"
+→ hr_general (asking ABOUT a policy, not requesting restricted data)
+
+Query: "What were last quarter's unreported trading volumes?"
+→ sensitive_info (requesting actual MNPI data)
+
+Query: "Hey, good morning!"
+→ greeting (pure greeting, no question)
+
+Query: "Hi! When does my health insurance start?"
+→ hr_general (greeting + question → classify by the QUESTION)
+
+Query: "Write me a poem about testing"
+→ out_of_scope (creative writing, unrelated to ICE work)
+
+Query: "How do I report an S1 bug?"
+→ qa_technical (bug reporting process is a QA team topic)
+
+Query: "Can I wear track pants to work?"
+→ hr_general (dress code is an HR policy topic)
+
+Query: "What's the deploy pipeline look like?"
+→ qa_technical (CI/CD and deployment is engineering/QA)
+
+Query: "Connect me to the HR agent"
+→ hr_general (explicit agent switch request)
+
+Query: "What about for the STAGING environment?"
+→ qa_technical (follow-up about environments is QA)
 
 ## Categories
 
@@ -21,18 +63,21 @@ qa_technical — QA engineering and automation topics:
   - API testing: REST, FIX protocol, contract testing, Pact
   - Bug reporting: Jira workflows, severity levels (S1-S4), bug templates
   - Test data: synthetic data, fixtures, trade generators, data masking
-  - QA team operations: sprint cadence, standups, ceremonies, retros
+  - QA team operations: sprint cadence, standups, ceremonies, retros, buddy system
   - QA onboarding tasks that are technical in nature (setting up dev tools, cloning repos)
+  - QA career path, team structure, sub-team responsibilities
 
 hr_general — Company and HR topics:
   - Schedule: working hours, remote/hybrid policy, time zones
-  - Time off: PTO, sick leave, holidays, parental leave
-  - Benefits: health insurance, 401k, HSA, dental, vision, wellness programs
-  - Onboarding logistics: checklist, orientation, first-week schedule, badge/access
-  - Office & facilities: address, parking, cafeteria, meeting rooms, IT help desk
-  - Policies: dress code, code of conduct, expense reimbursement, travel
-  - Company info: MNPI policy (asking what it IS, not requesting actual MNPI data)
+  - Time off: PTO, sick leave, holidays, parental leave, bereavement, FMLA, mental health days
+  - Benefits: health insurance, 401k, HSA, FSA, dental, vision, wellness programs, gym subsidy
+  - Compensation: payroll questions (not actual salary amounts), direct deposit, first paycheck
+  - Onboarding logistics: checklist, orientation, first-week schedule, badge/access, dress code
+  - Office & facilities: address, parking, cafeteria, meeting rooms, IT help desk, fitness center, quiet rooms
+  - Policies: dress code, code of conduct, expense reimbursement, travel, social media policy
+  - Company info: MNPI policy (asking what it IS, not requesting actual MNPI data), data classification
   - HR contacts, org structure, reporting lines
+  - Resignation, probation period, performance reviews, tuition reimbursement
 
 sensitive_info — Explicit requests for restricted data:
   - Passwords, API keys, tokens, secrets, connection strings
