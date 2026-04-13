@@ -76,7 +76,7 @@ AGENTS = {
 
 st.markdown(f"""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
 
     /* ── Global: white background, ICE brand text, Garamond font ── */
     .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"],
@@ -108,6 +108,14 @@ st.markdown(f"""
     /* Body text — ICE dark navy */
     p, span, li, td, th, label, div {{ color: {ICE_DARK}; }}
     h1, h2, h3, h4, h5, h6 {{ color: {ICE_TEAL} !important; }}
+
+    /* Prevent italic text from collapsing word spacing */
+    em, i, [data-testid="stMarkdownContainer"] em,
+    [data-testid="stChatMessage"] em {{
+        font-style: italic;
+        word-spacing: normal !important;
+        letter-spacing: normal !important;
+    }}
 
     /* ── Chat messages ── */
     [data-testid="stChatMessage"] {{
