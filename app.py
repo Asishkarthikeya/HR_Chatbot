@@ -180,10 +180,26 @@ st.markdown(f"""
     th {{ background-color: #e0f0f6 !important; color: {ICE_TEAL} !important; }}
     td {{ background-color: #ffffff !important; color: {ICE_DARK} !important; }}
 
-    /* Buttons */
+    /* Buttons — main content area */
     .stButton > button {{
-        color: {ICE_TEAL} !important;
+        color: #ffffff !important;
+        background-color: rgba(35, 95, 115, 0.7) !important;
+        border: 1px solid rgba(113, 197, 232, 0.5) !important;
+        backdrop-filter: blur(4px);
+    }}
+    .stButton > button:hover {{
+        background-color: rgba(113, 197, 232, 0.35) !important;
         border-color: {ICE_LIGHT_BLUE} !important;
+    }}
+
+    /* Caption text */
+    [data-testid="stCaptionContainer"] p {{
+        color: #a0c0d8 !important;
+    }}
+
+    /* Divider line */
+    hr {{
+        border-color: rgba(113, 197, 232, 0.25) !important;
     }}
 
     /* ── Sidebar — stocks background with dark overlay ── */
@@ -361,7 +377,7 @@ st.markdown(f"""
     .section-header {{
         font-size: 1.1em;
         font-weight: 600;
-        color: {ICE_TEAL} !important;
+        color: {ICE_LIGHT_BLUE} !important;
         margin: 28px 0 16px 0;
         display: flex;
         align-items: center;
@@ -869,7 +885,7 @@ def render_chat():
         <div style="display:flex; align-items:center; gap:14px; margin-bottom:6px;">
             <span style="font-size:2.2em;">&#9881;</span>
             <div>
-                <div style="font-size:1.3em; font-weight:700; color:{ICE_TEAL};">ICE QAgent</div>
+                <div style="font-size:1.3em; font-weight:700; color:{ICE_LIGHT_BLUE};">ICE QAgent</div>
                 <span class="agent-badge-tag" style="background-color:{ICE_TEAL}; font-size:0.65em;">INTENT AGENT → AUTO-ROUTED</span>
             </div>
         </div>
@@ -882,7 +898,7 @@ def render_chat():
         <div style="display:flex; align-items:center; gap:14px; margin-bottom:6px;">
             <span style="font-size:2.2em;">{header_icon}</span>
             <div>
-                <div style="font-size:1.3em; font-weight:700; color:{ICE_TEAL};">{agent_info["name"]}</div>
+                <div style="font-size:1.3em; font-weight:700; color:{ICE_LIGHT_BLUE};">{agent_info["name"]}</div>
                 <span class="agent-badge-tag" style="background-color:{agent_info["badge_color"]}; font-size:0.65em;">DIRECT → {agent_info["badge"]}</span>
             </div>
         </div>
