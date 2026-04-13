@@ -592,9 +592,9 @@ def render_dashboard():
 
     # Section 1: User Interface Layer
     st.markdown(f"""<div style="{_PB}">
-    <div style="display:inline-block; background:#C17A28; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">1 &mdash; USER INTERFACE LAYER</div>
+    <div style="display:inline-block; background:linear-gradient(135deg, #3a7ca5 0%, #5ba4c9 100%); color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">1 &mdash; USER INTERFACE LAYER</div>
     <div style="display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;">
-      <div style="background:{ICE_TEAL}; color:white; padding:12px 20px; border-radius:10px; text-align:center; min-width:150px;"><div style="font-weight:700; font-size:0.85em;">Streamlit Frontend</div><div style="font-size:0.7em; opacity:0.85;">Dashboard &bull; Chat &bull; Admin</div></div>
+      <div style="background:linear-gradient(135deg, #2c6b8a 0%, #3a8ab5 100%); color:white; padding:12px 20px; border-radius:10px; text-align:center; min-width:150px; box-shadow:0 2px 8px rgba(44,107,138,0.3);"><div style="font-weight:700; font-size:0.85em;">Streamlit Frontend</div><div style="font-size:0.7em; opacity:0.85;">Dashboard &bull; Chat &bull; Admin</div></div>
       {_ARR}
       <div style="display:flex; gap:8px;">
         <div style="background:#e8eef5; border:1.5px solid #b8c8d8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#1a3a50; min-width:100px;"><strong>Dashboard</strong><br><span style="font-size:0.9em; color:#3d5a6e;">Pipeline &bull; Agents</span></div>
@@ -602,18 +602,18 @@ def render_dashboard():
         <div style="background:#e8eef5; border:1.5px solid #b8c8d8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#1a3a50; min-width:100px;"><strong>Admin</strong><br><span style="font-size:0.9em; color:#3d5a6e;">Ingest &bull; Test</span></div>
       </div>
       {_ARR}
-      <div style="background:{ICE_TEAL}; color:white; padding:12px 20px; border-radius:10px; text-align:center; min-width:150px;"><div style="font-weight:700; font-size:0.85em;">User Query</div><div style="font-size:0.7em; opacity:0.85;">+ Chat History + Agent Selection</div></div>
+      <div style="background:linear-gradient(135deg, #2c6b8a 0%, #3a8ab5 100%); color:white; padding:12px 20px; border-radius:10px; text-align:center; min-width:150px; box-shadow:0 2px 8px rgba(44,107,138,0.3);"><div style="font-weight:700; font-size:0.85em;">User Query</div><div style="font-size:0.7em; opacity:0.85;">+ Chat History + Agent Selection</div></div>
     </div>
     {_CONN}
     </div>""", unsafe_allow_html=True)
 
     # Section 2: Multi-Agent Orchestration
     st.markdown(f"""<div style="{_PC}">
-    <div style="display:inline-block; background:{ICE_TEAL}; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">2 &mdash; MULTI-AGENT ORCHESTRATION (LANGGRAPH)</div>
+    <div style="display:inline-block; background:linear-gradient(135deg, #1a5c6e 0%, #2a7a8e 100%); color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">2 &mdash; MULTI-AGENT ORCHESTRATION (LANGGRAPH)</div>
     <div style="display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; margin-bottom:16px;">
       <div style="background:{ICE_TEAL}; color:white; padding:10px 18px; border-radius:10px; text-align:center; min-width:110px;"><div style="font-weight:700; font-size:0.82em;">User Query</div></div>
       {_ARR}
-      <div style="background:#B71C1C; color:white; padding:10px 18px; border-radius:10px; text-align:center; min-width:160px;"><div style="font-weight:700; font-size:0.82em;">Pre-Routing Guardrail</div><div style="font-size:0.68em; opacity:0.9;">Regex &bull; Injection &bull; Credentials &bull; MNPI</div></div>
+      <div style="background:linear-gradient(135deg, #b85450 0%, #d4726e 100%); color:white; padding:10px 18px; border-radius:10px; text-align:center; min-width:160px; box-shadow:0 2px 6px rgba(184,84,80,0.25);"><div style="font-weight:700; font-size:0.82em;">Pre-Routing Guardrail</div><div style="font-size:0.68em; opacity:0.9;">Regex &bull; Injection &bull; Credentials &bull; MNPI</div></div>
       {_ARR}
       <div style="text-align:center;"><div style="background:#fde8e8; border:1.5px solid #e8a8a8; color:#7a1a1a; padding:6px 12px; border-radius:6px; font-size:0.72em; font-weight:700;">BLOCKED?</div><div style="font-size:0.65em; font-weight:600; margin-top:3px;"><span style="color:#C62828;">Yes → END</span> &nbsp; <span style="color:#2E8B57;">No ↓</span></div></div>
       {_ARR}
@@ -621,16 +621,16 @@ def render_dashboard():
     </div>
     <div style="text-align:center; color:#8aa4b8; font-size:1.2em; margin-bottom:8px;">&#9660; &nbsp; &#9660; &nbsp; &#9660;</div>
     <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
-      <div style="background:#2E8B57; color:white; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;"><div style="font-weight:700; font-size:0.85em;">HR &amp; Onboarding Agent</div><div style="font-size:0.68em; opacity:0.9;">hr_general &bull; greeting &bull; out_of_scope</div></div>
+      <div style="background:linear-gradient(135deg, #4a9070 0%, #5aaa85 100%); color:white; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px; box-shadow:0 2px 6px rgba(74,144,112,0.25);"><div style="font-weight:700; font-size:0.85em;">HR &amp; Onboarding Agent</div><div style="font-size:0.68em; opacity:0.9;">hr_general &bull; greeting &bull; out_of_scope</div></div>
       <div style="background:{ICE_LIGHT_BLUE}; border:2px solid #5ab0d0; color:#0a2540; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;"><div style="font-weight:700; font-size:0.85em;">QA Expert Agent</div><div style="font-size:0.68em;">qa_technical</div></div>
-      <div style="background:#C62828; color:white; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;"><div style="font-weight:700; font-size:0.85em;">Security Guardrail</div><div style="font-size:0.68em; opacity:0.9;">sensitive_info</div></div>
+      <div style="background:linear-gradient(135deg, #b85450 0%, #d4726e 100%); color:white; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px; box-shadow:0 2px 6px rgba(184,84,80,0.25);"><div style="font-weight:700; font-size:0.85em;">Security Guardrail</div><div style="font-size:0.68em; opacity:0.9;">sensitive_info</div></div>
     </div>
     {_CONN}
     </div>""", unsafe_allow_html=True)
 
     # Section 3: Specialist Agents
     st.markdown(f"""<div style="{_PC}">
-    <div style="display:inline-block; background:#1a4a5c; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">3 &mdash; SPECIALIST AGENTS (REACT REASONING)</div>
+    <div style="display:inline-block; background:linear-gradient(135deg, #1a5c6e 0%, #2a7a8e 100%); color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">3 &mdash; SPECIALIST AGENTS (REACT REASONING)</div>
     <div style="display:flex; gap:14px; flex-wrap:wrap;">
       <div style="flex:1; min-width:240px; background:#f0f9fd; border:2px solid #71C5E8; border-radius:12px; padding:16px;">
         <div style="font-weight:700; font-size:0.85em; color:#1a6080; margin-bottom:6px;">&#128295; QA Expert Agent</div>
@@ -656,7 +656,7 @@ def render_dashboard():
 
     # Section 4: RAG Pipeline
     st.markdown(f"""<div style="{_PC}">
-    <div style="display:inline-block; background:#1a4a5c; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">4 &mdash; RETRIEVAL-AUGMENTED GENERATION (RAG) PIPELINE</div>
+    <div style="display:inline-block; background:linear-gradient(135deg, #4a7c8a 0%, #6a9caa 100%); color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">4 &mdash; RETRIEVAL-AUGMENTED GENERATION (RAG) PIPELINE</div>
     <div style="display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;">
       <div style="background:#f0e6f6; border:1.5px solid #d4b8e8; padding:10px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#5a2d78; min-width:95px;"><strong>LLM Query<br>Expansion</strong><br><span style="font-size:0.85em;">Colloquial → Formal</span></div>
       {_ARR_S}
@@ -675,7 +675,7 @@ def render_dashboard():
 
     # Section 5: Data Sources
     st.markdown(f"""<div style="{_PC}">
-    <div style="display:inline-block; background:#2E8B57; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">5 &mdash; DATA &amp; KNOWLEDGE SOURCES</div>
+    <div style="display:inline-block; background:linear-gradient(135deg, #4a9070 0%, #5aaa85 100%); color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">5 &mdash; DATA &amp; KNOWLEDGE SOURCES</div>
     <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
       <div style="flex:1; min-width:200px; max-width:280px; background:#e0f2e9; border:1.5px solid #a8d4b8; border-radius:10px; padding:14px; text-align:center;">
         <div style="font-weight:700; font-size:0.78em; color:#2E7D32; margin-bottom:6px;">&#128218; HR Docs Collection</div>
@@ -698,7 +698,7 @@ def render_dashboard():
 
     # Section 6: LLM Infrastructure
     st.markdown(f"""<div style="{_PC}">
-    <div style="display:inline-block; background:#7B3FA0; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">6 &mdash; LLM INFRASTRUCTURE (WATERFALL FALLBACK)</div>
+    <div style="display:inline-block; background:linear-gradient(135deg, #6a5a90 0%, #8a7ab0 100%); color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">6 &mdash; LLM INFRASTRUCTURE (WATERFALL FALLBACK)</div>
     <div style="display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;">
       <div style="flex:1; min-width:180px;">
         <div style="font-weight:700; font-size:0.75em; color:#7B3FA0; margin-bottom:8px; text-align:center;">Primary: Google Gemini</div>
@@ -735,7 +735,7 @@ def render_dashboard():
 
     # Section 7: Embedding & Vector Store
     st.markdown(f"""<div style="{_PC}">
-    <div style="display:inline-block; background:#4A7C8A; color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">7 &mdash; EMBEDDING, VECTOR STORE &amp; INGESTION</div>
+    <div style="display:inline-block; background:linear-gradient(135deg, #4a7c8a 0%, #6a9caa 100%); color:white; font-size:0.65em; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:4px 12px; border-radius:4px; margin-bottom:14px;">7 &mdash; EMBEDDING, VECTOR STORE &amp; INGESTION</div>
     <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
       <div style="flex:1; min-width:400px;">
         <div style="font-weight:700; font-size:0.75em; color:{ICE_TEAL}; margin-bottom:10px;">Document Ingestion Pipeline</div>
