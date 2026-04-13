@@ -72,17 +72,35 @@ AGENTS = {
     },
 }
 
+# ── Load background images as base64 ─────────────────────────────────
+_assets_dir = pathlib.Path(__file__).parent / "assets"
+_bg_nyse_b64 = base64.b64encode((_assets_dir / "bg_nyse.png").read_bytes()).decode()
+_bg_stocks_b64 = base64.b64encode((_assets_dir / "bg_stocks.png").read_bytes()).decode()
+
 # ── Custom CSS ────────────────────────────────────────────────────────
 
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
 
-    /* ── Global: white background, ICE brand text, Garamond font ── */
-    .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"],
+    /* ── Global: NYSE background with dark overlay ── */
+    .stApp {{
+        background-image: url('data:image/png;base64,{_bg_nyse_b64}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }}
+    /* Dark overlay on the main content area for text readability */
+    [data-testid="stAppViewContainer"] {{
+        background-color: rgba(10, 22, 40, 0.88) !important;
+    }}
+    [data-testid="stHeader"] {{
+        background-color: transparent !important;
+    }}
     .main, .block-container, [data-testid="stMainBlockContainer"] {{
-        background-color: #ffffff !important;
-        color: {ICE_DARK} !important;
+        background-color: transparent !important;
+        color: #e8f0f8 !important;
         font-family: 'EB Garamond', 'Garamond', 'Georgia', serif !important;
     }}
     .block-container {{ padding-top: 1rem; }}
@@ -105,9 +123,9 @@ st.markdown(f"""
         font-family: 'Material Symbols Rounded' !important;
     }}
 
-    /* Body text — ICE dark navy */
-    p, span, li, td, th, label, div {{ color: {ICE_DARK}; }}
-    h1, h2, h3, h4, h5, h6 {{ color: {ICE_TEAL} !important; }}
+    /* Body text — light for dark background */
+    p, span, li, td, th, label, div {{ color: #e0eaf4; }}
+    h1, h2, h3, h4, h5, h6 {{ color: {ICE_LIGHT_BLUE} !important; }}
 
     /* Prevent italic text from collapsing word spacing */
     em, i, [data-testid="stMarkdownContainer"] em,
@@ -117,11 +135,12 @@ st.markdown(f"""
         letter-spacing: normal !important;
     }}
 
-    /* ── Chat messages ── */
+    /* ── Chat messages — glassmorphism cards on dark bg ── */
     [data-testid="stChatMessage"] {{
-        background-color: #ffffff !important;
-        border: 1px solid #d4e8f0;
+        background-color: rgba(255, 255, 255, 0.92) !important;
+        border: 1px solid rgba(113, 197, 232, 0.3);
         border-radius: 12px;
+        backdrop-filter: blur(8px);
     }}
     [data-testid="stChatMessage"] p,
     [data-testid="stChatMessage"] span,
@@ -133,24 +152,28 @@ st.markdown(f"""
         color: #1a2332 !important;
     }}
     [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {{
-        background-color: {ICE_LIGHT_BG} !important;
+        background-color: rgba(224, 244, 252, 0.90) !important;
     }}
-    .stMarkdown, .stMarkdown p {{ color: #1a2332 !important; }}
+    .stMarkdown, .stMarkdown p {{ color: #e0eaf4 !important; }}
+    [data-testid="stChatMessage"] .stMarkdown,
+    [data-testid="stChatMessage"] .stMarkdown p {{ color: #1a2332 !important; }}
 
     /* Chat input */
     [data-testid="stChatInput"] textarea {{
-        background-color: #ffffff !important;
+        background-color: rgba(255, 255, 255, 0.9) !important;
         color: {ICE_DARK} !important;
-        border: 1px solid {ICE_LIGHT_BLUE} !important;
+        border: 1px solid rgba(113, 197, 232, 0.5) !important;
+        backdrop-filter: blur(4px);
     }}
 
     /* Expanders */
     [data-testid="stExpander"] {{
-        background-color: #fafcff !important;
-        border: 1px solid #d4e8f0 !important;
+        background-color: rgba(250, 252, 255, 0.9) !important;
+        border: 1px solid rgba(113, 197, 232, 0.3) !important;
         border-radius: 8px;
+        backdrop-filter: blur(4px);
     }}
-    [data-testid="stExpander"] summary span {{ color: {ICE_TEAL} !important; }}
+    [data-testid="stExpander"] summary span {{ color: {ICE_LIGHT_BLUE} !important; }}
 
     /* Tables */
     .stTable, table {{ color: {ICE_DARK} !important; }}
@@ -163,10 +186,20 @@ st.markdown(f"""
         border-color: {ICE_LIGHT_BLUE} !important;
     }}
 
-    /* ── Sidebar — ICE dark teal ── */
+    /* ── Sidebar — stocks background with dark overlay ── */
     [data-testid="stSidebar"] {{
-        background-color: {ICE_TEAL} !important;
+        background-image: url('data:image/png;base64,{_bg_stocks_b64}');
+        background-size: cover;
+        background-position: center;
     }}
+    [data-testid="stSidebar"]::before {{
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(180deg, rgba(10, 22, 40, 0.92) 0%, rgba(35, 95, 115, 0.90) 100%);
+        z-index: 0;
+    }}
+    [data-testid="stSidebar"] > div {{ position: relative; z-index: 1; }}
     [data-testid="stSidebar"] * {{ color: #ffffff !important; }}
     [data-testid="stSidebar"] .stButton > button {{
         background-color: transparent;
