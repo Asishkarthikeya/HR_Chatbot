@@ -232,12 +232,13 @@ st.markdown(f"""
 
     /* ── Stat cards ── */
     .stat-card {{
-        background: {ICE_LIGHT_BG};
-        border: 1px solid #b8dde9;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(113, 197, 232, 0.4);
         border-radius: 12px;
         padding: 20px 24px;
         text-align: center;
-        box-shadow: 0 1px 3px rgba(35,95,115,0.08);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        backdrop-filter: blur(6px);
     }}
     .stat-number {{
         font-size: 1.6em;
@@ -254,12 +255,13 @@ st.markdown(f"""
 
     /* ── Agent cards ── */
     .agent-card {{
-        background: {ICE_LIGHT_BG};
-        border: 1px solid #b8dde9;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(113, 197, 232, 0.4);
         border-radius: 14px;
         padding: 24px;
         min-height: 200px;
-        box-shadow: 0 1px 4px rgba(35,95,115,0.08);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        backdrop-filter: blur(6px);
         transition: transform 0.2s, box-shadow 0.2s;
         cursor: pointer;
     }}
@@ -563,9 +565,9 @@ def render_dashboard():
     """, unsafe_allow_html=True)
 
     # ── Complete Project Pipeline ────────────────────────────────────
-    _PB = "background:#f6fbff; border:1px solid #d0e4f0; border-radius:16px; padding:24px 28px; margin-bottom:0; border-bottom:none; border-bottom-left-radius:0; border-bottom-right-radius:0;"
-    _PC = "background:#f6fbff; border:1px solid #d0e4f0; border-left:1px solid #d0e4f0; border-right:1px solid #d0e4f0; border-top:none; border-bottom:none; padding:0 28px 24px 28px;"
-    _PE = "background:#f6fbff; border:1px solid #d0e4f0; border-radius:16px; border-top:none; border-top-left-radius:0; border-top-right-radius:0; padding:0 28px 28px 28px; margin-bottom:28px;"
+    _PB = "background:rgba(255,255,255,0.95); border:1px solid #d0e4f0; border-radius:16px; padding:24px 28px; margin-bottom:0; border-bottom:none; border-bottom-left-radius:0; border-bottom-right-radius:0;"
+    _PC = "background:rgba(255,255,255,0.95); border:1px solid #d0e4f0; border-left:1px solid #d0e4f0; border-right:1px solid #d0e4f0; border-top:none; border-bottom:none; padding:0 28px 24px 28px;"
+    _PE = "background:rgba(255,255,255,0.95); border:1px solid #d0e4f0; border-radius:16px; border-top:none; border-top-left-radius:0; border-top-right-radius:0; padding:0 28px 28px 28px; margin-bottom:28px;"
     _CONN = '<div style="text-align:center; color:#8aa4b8; font-size:1.5em; margin:4px 0 8px 0;">&#9660;</div>'
     _ARR = '<div style="color:#8aa4b8; font-size:1.5em; padding:0 8px;">&#10142;</div>'
     _ARR_S = '<div style="color:#8aa4b8; font-size:1.3em; padding:0 5px;">&#10142;</div>'
@@ -579,9 +581,9 @@ def render_dashboard():
       <div style="background:{ICE_TEAL}; color:white; padding:12px 20px; border-radius:10px; text-align:center; min-width:150px;"><div style="font-weight:700; font-size:0.85em;">Streamlit Frontend</div><div style="font-size:0.7em; opacity:0.85;">Dashboard &bull; Chat &bull; Admin</div></div>
       {_ARR}
       <div style="display:flex; gap:8px;">
-        <div style="background:#f0f4f8; border:1.5px solid #d0dde8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#3d5a6e; min-width:100px;"><strong>Dashboard</strong><br><span style="font-size:0.9em;">Pipeline &bull; Agents</span></div>
-        <div style="background:#f0f4f8; border:1.5px solid #d0dde8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#3d5a6e; min-width:100px;"><strong>Chat</strong><br><span style="font-size:0.9em;">Master &bull; Specialist</span></div>
-        <div style="background:#f0f4f8; border:1.5px solid #d0dde8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#3d5a6e; min-width:100px;"><strong>Admin</strong><br><span style="font-size:0.9em;">Ingest &bull; Test</span></div>
+        <div style="background:#e8eef5; border:1.5px solid #b8c8d8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#1a3a50; min-width:100px;"><strong>Dashboard</strong><br><span style="font-size:0.9em; color:#3d5a6e;">Pipeline &bull; Agents</span></div>
+        <div style="background:#e8eef5; border:1.5px solid #b8c8d8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#1a3a50; min-width:100px;"><strong>Chat</strong><br><span style="font-size:0.9em; color:#3d5a6e;">Master &bull; Specialist</span></div>
+        <div style="background:#e8eef5; border:1.5px solid #b8c8d8; padding:8px 14px; border-radius:8px; font-size:0.72em; text-align:center; color:#1a3a50; min-width:100px;"><strong>Admin</strong><br><span style="font-size:0.9em; color:#3d5a6e;">Ingest &bull; Test</span></div>
       </div>
       {_ARR}
       <div style="background:{ICE_TEAL}; color:white; padding:12px 20px; border-radius:10px; text-align:center; min-width:150px;"><div style="font-weight:700; font-size:0.85em;">User Query</div><div style="font-size:0.7em; opacity:0.85;">+ Chat History + Agent Selection</div></div>
@@ -599,12 +601,12 @@ def render_dashboard():
       {_ARR}
       <div style="text-align:center;"><div style="background:#fde8e8; border:1.5px solid #e8a8a8; color:#7a1a1a; padding:6px 12px; border-radius:6px; font-size:0.72em; font-weight:700;">BLOCKED?</div><div style="font-size:0.65em; font-weight:600; margin-top:3px;"><span style="color:#C62828;">Yes → END</span> &nbsp; <span style="color:#2E8B57;">No ↓</span></div></div>
       {_ARR}
-      <div style="background:#d4eaf7; border:2px solid #a8d4ed; color:#1a4a5c; padding:10px 18px; border-radius:10px; text-align:center; min-width:180px;"><div style="font-weight:700; font-size:0.82em;">Intent Agent</div><div style="font-size:0.68em;">LLM Classification + Agent Switch Detection</div></div>
+      <div style="background:{ICE_TEAL}; border:2px solid #1a6080; color:white; padding:10px 18px; border-radius:10px; text-align:center; min-width:180px;"><div style="font-weight:700; font-size:0.82em;">Intent Agent</div><div style="font-size:0.68em; opacity:0.9;">LLM Classification + Agent Switch Detection</div></div>
     </div>
     <div style="text-align:center; color:#8aa4b8; font-size:1.2em; margin-bottom:8px;">&#9660; &nbsp; &#9660; &nbsp; &#9660;</div>
     <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
       <div style="background:#2E8B57; color:white; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;"><div style="font-weight:700; font-size:0.85em;">HR &amp; Onboarding Agent</div><div style="font-size:0.68em; opacity:0.9;">hr_general &bull; greeting &bull; out_of_scope</div></div>
-      <div style="background:#e0f2fc; border:2px solid #71C5E8; color:#1a6080; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;"><div style="font-weight:700; font-size:0.85em;">QA Expert Agent</div><div style="font-size:0.68em;">qa_technical</div></div>
+      <div style="background:{ICE_LIGHT_BLUE}; border:2px solid #5ab0d0; color:#0a2540; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;"><div style="font-weight:700; font-size:0.85em;">QA Expert Agent</div><div style="font-size:0.68em;">qa_technical</div></div>
       <div style="background:#C62828; color:white; padding:10px 22px; border-radius:10px; text-align:center; min-width:170px;"><div style="font-weight:700; font-size:0.85em;">Security Guardrail</div><div style="font-size:0.68em; opacity:0.9;">sensitive_info</div></div>
     </div>
     {_CONN}
