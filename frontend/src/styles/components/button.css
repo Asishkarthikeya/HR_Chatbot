@@ -1,0 +1,46 @@
+/* Button — outlined primary that fills on hover. Dark cyan on white. */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 1.05rem 2.4rem;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: var(--ls-medium);
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  transition:
+    background-color var(--dur-med) var(--ease-standard),
+    color var(--dur-med) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-med) var(--ease-standard);
+}
+
+.btn--primary {
+  color: var(--color-ice-cyan);
+  background-color: #ffffff;
+  border: var(--border-strong);
+}
+
+.btn--primary:hover,
+.btn--primary:focus-visible {
+  background-color: var(--color-ice-cyan);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lift);
+}
+
+.btn--primary:active {
+  transform: translateY(0);
+}
+
+.btn__arrow {
+  display: inline-block;
+  transition: transform var(--dur-med) var(--ease-standard);
+}
+
+.btn:hover .btn__arrow {
+  transform: translateX(4px);
+}

@@ -1,0 +1,98 @@
+export const PIPELINE = [
+    {
+        id: "intake",
+        number: "01",
+        label: "Input Layer",
+        heading: "Query intake & intent routing",
+        lead: "User queries enter through text or voice. The intent agent classifies each request and routes to the right specialist.",
+        steps: [
+            {
+                id: "intake-text",
+                index: 1,
+                title: "Text & voice capture",
+                subtitle: "Streamlit · Web Speech API",
+                body: "Chat input and native microphone. Voice is transcribed server-side by Groq Whisper before it reaches the router.",
+            },
+            {
+                id: "intake-route",
+                index: 2,
+                title: "Intent classifier",
+                subtitle: "LangGraph supervisor",
+                body: "A lightweight classifier maps the query to one of HR, QA, or Security. Ambiguous intents default to HR.",
+                metric: "<120ms p95",
+            },
+        ],
+    },
+    {
+        id: "retrieval",
+        number: "02",
+        label: "Retrieval Layer",
+        heading: "Grounded context assembly",
+        lead: "Every agent is retrieval-grounded. Queries are embedded, searched against the agent's private index, then reranked.",
+        steps: [
+            {
+                id: "retrieval-embed",
+                index: 3,
+                title: "Embedding",
+                subtitle: "text-embedding-3-small",
+                body: "Queries are embedded with the same model used at index time, then searched against a namespaced Chroma collection per agent.",
+            },
+            {
+                id: "retrieval-rerank",
+                index: 4,
+                title: "Rerank",
+                subtitle: "FlashRank",
+                body: "Top-20 candidates are reranked with a cross-encoder to push the most relevant context into the top-5 window.",
+                metric: "top-5 nDCG 0.81",
+            },
+        ],
+    },
+    {
+        id: "generation",
+        number: "03",
+        label: "Generation Layer",
+        heading: "Agent reasoning & response",
+        lead: "The specialist agent generates a grounded answer using its system prompt, retrieved context, and the conversation history.",
+        steps: [
+            {
+                id: "gen-prompt",
+                index: 5,
+                title: "System prompt",
+                subtitle: "Role-specific persona",
+                body: "Each agent has a carefully tuned persona — Nova for HR, senior QA for testing, a security officer for guardrails.",
+            },
+            {
+                id: "gen-generate",
+                index: 6,
+                title: "Generation",
+                subtitle: "Claude / Groq",
+                body: "Streaming tokens back to the client. Markdown, code blocks, and tables are preserved end-to-end.",
+                metric: "~40 tok/s stream",
+            },
+        ],
+    },
+    {
+        id: "guardrail",
+        number: "04",
+        label: "Guardrail Layer",
+        heading: "Post-generation safety check",
+        lead: "Every response runs through the security agent before it reaches the user. Sensitive data is redacted, policy violations are rewritten.",
+        steps: [
+            {
+                id: "guard-injection",
+                index: 7,
+                title: "Prompt-injection defense",
+                subtitle: "Multi-pattern detection",
+                body: "Catches jailbreak attempts, role confusion, and indirect injection via retrieved documents.",
+            },
+            {
+                id: "guard-pii",
+                index: 8,
+                title: "PII redaction",
+                subtitle: "Regex + NER",
+                body: "SSN, card numbers, phone numbers, emails, and proprietary identifiers are masked before delivery.",
+                metric: "0 leaks in eval",
+            },
+        ],
+    },
+];

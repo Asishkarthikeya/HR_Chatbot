@@ -1,0 +1,61 @@
+/* App shell — sidebar + main content area on a light canvas. */
+
+.shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+  background-color: var(--surface-canvas);
+}
+
+.shell__main {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(ellipse at 0% 0%, var(--color-ice-cyan-soft) 0%, transparent 55%),
+    var(--surface-canvas);
+}
+
+.page {
+  padding: var(--space-8) clamp(var(--space-6), 4vw, var(--space-8));
+  max-width: 1240px;
+  margin-inline: auto;
+}
+
+.page__header {
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.page__title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  font-weight: 500;
+  line-height: var(--lh-tight);
+  margin-top: var(--space-4);
+  color: var(--color-ink);
+}
+
+.page__title-em {
+  font-style: italic;
+  color: var(--color-ice-cyan);
+}
+
+.page__lead {
+  margin-top: var(--space-4);
+  font-family: var(--font-serif);
+  font-size: var(--fs-lead);
+  line-height: var(--lh-body);
+  color: var(--text-secondary-dark);
+  max-width: 62ch;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+  .shell .sidebar {
+    display: none;
+  }
+}

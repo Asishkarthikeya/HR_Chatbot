@@ -24,6 +24,7 @@ EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
 HR_COLLECTION_NAME = "hr_docs"
 QA_COLLECTION_NAME = "qa_docs"
+USERS_COLLECTION_NAME = "users"
 
 # Chunking settings
 CHUNK_SIZE = 600

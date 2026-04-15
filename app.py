@@ -2,8 +2,13 @@
 
 import base64
 import pathlib
+import uuid
+from datetime import datetime, timezone
 import streamlit as st
 from src.graph import run_agent
+from src.auth import login_or_create as auth_login_or_create
+from src.chat_history import save_exchange, get_sessions, get_session_detail, delete_session
+from src.voice_agent import render_voice_mic, speak_text
 
 # ── ICE Brand Colors ─────────────────────────────────────────────────
 # Source: ice.com — official ICE visual identity
@@ -30,6 +35,14 @@ if "current_page" not in st.session_state:
     st.session_state.current_page = "dashboard"
 if "active_agent" not in st.session_state:
     st.session_state.active_agent = None
+if "user" not in st.session_state:
+    st.session_state.user = None
+if "auth_mode" not in st.session_state:
+    st.session_state.auth_mode = "login"
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())[:8]
+if "history_view_session" not in st.session_state:
+    st.session_state.history_view_session = None
 
 # ── Agent Definitions ─────────────────────────────────────────────────
 
@@ -76,6 +89,7 @@ AGENTS = {
 _assets_dir = pathlib.Path(__file__).parent / "assets"
 _bg_nyse_b64 = base64.b64encode((_assets_dir / "bg_nyse.png").read_bytes()).decode()
 _bg_stocks_b64 = base64.b64encode((_assets_dir / "bg_stocks.png").read_bytes()).decode()
+_bg_login_b64 = base64.b64encode((_assets_dir / "blog_ice.jpg").read_bytes()).decode()
 
 # ── Custom CSS ────────────────────────────────────────────────────────
 
@@ -126,6 +140,54 @@ st.markdown(f"""
     /* Body text — light for dark background */
     p, span, li, td, th, label, div {{ color: #e0eaf4; }}
     h1, h2, h3, h4, h5, h6 {{ color: {ICE_LIGHT_BLUE} !important; }}
+
+    /* ── Pipeline block (formal navy/slate palette) ── */
+    /* Re-enable inheritance inside the pipeline so child <span>/<strong>
+       pick up the dark inline color set on their parent divs. Without
+       this, the global span/div rule above wipes out subtitle contrast. */
+    .ice-pipeline span,
+    .ice-pipeline strong,
+    .ice-pipeline p,
+    .ice-pipeline li {{
+        color: inherit !important;
+    }}
+    /* Unify all pastel card backgrounds → single formal slate bg */
+    .ice-pipeline div[style*="background:#f0f4f8"],
+    .ice-pipeline div[style*="background:#e8f4f8"],
+    .ice-pipeline div[style*="background:#fef0e0"],
+    .ice-pipeline div[style*="background:#f0e6f6"],
+    .ice-pipeline div[style*="background:#e0f2e9"],
+    .ice-pipeline div[style*="background:#fde8e8"],
+    .ice-pipeline div[style*="background:#fef5f5"],
+    .ice-pipeline div[style*="background:#f0f9fd"],
+    .ice-pipeline div[style*="background:#f0f9f2"],
+    .ice-pipeline div[style*="background:#e8eef5"] {{
+        background: #f2f6fb !important;
+        border-color: #c8d4e0 !important;
+        color: #1a3a50 !important;
+    }}
+    /* Unify section-header gradient chips → dignified navy */
+    .ice-pipeline div[style*="linear-gradient(135deg, #3a7ca5"],
+    .ice-pipeline div[style*="linear-gradient(135deg, #1a5c6e"],
+    .ice-pipeline div[style*="linear-gradient(135deg, #4a7c8a"],
+    .ice-pipeline div[style*="linear-gradient(135deg, #4a9070"],
+    .ice-pipeline div[style*="linear-gradient(135deg, #6a5a90"] {{
+        background: linear-gradient(135deg, #0a2540 0%, #1e4466 100%) !important;
+    }}
+    /* Unify the big "step" gradient cards (Streamlit Frontend, User Query, Intent Agent) */
+    .ice-pipeline div[style*="linear-gradient(135deg, #2c6b8a"],
+    .ice-pipeline div[style*="background:#235F73"] {{
+        background: linear-gradient(135deg, #0a2540 0%, #235f73 100%) !important;
+    }}
+    /* Tone the connector arrows/carets to match */
+    .ice-pipeline div[style*="color:#8aa4b8"] {{
+        color: #4a6278 !important;
+    }}
+    /* Make the outer section wrappers less blue-tinted, more paper-like */
+    .ice-pipeline div[style*="background:rgba(255,255,255,0.95)"] {{
+        background: rgba(250, 252, 254, 0.98) !important;
+        border-color: #c8d4e0 !important;
+    }}
 
     /* Prevent italic text from collapsing word spacing */
     em, i, [data-testid="stMarkdownContainer"] em,
@@ -392,6 +454,235 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 
+# ══════════════════════════════════════════════════════════════════════
+# AUTHENTICATION GATE
+# ══════════════════════════════════════════════════════════════════════
+
+def render_login_page():
+    """Full-screen sign-in page with ICE background.
+
+    First-time users are auto-registered on submit; returning users are
+    validated against their stored password.
+    """
+    st.markdown(f"""
+    <style>
+        .stApp {{
+            background-image: url('data:image/jpeg;base64,{_bg_login_b64}') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-attachment: fixed !important;
+        }}
+        [data-testid="stAppViewContainer"] {{
+            background-color: rgba(5, 15, 30, 0.78) !important;
+        }}
+        [data-testid="stSidebar"] {{ display: none !important; }}
+        [data-testid="collapsedControl"] {{ display: none !important; }}
+        .block-container {{
+            max-width: 480px !important;
+            padding-top: 5rem !important;
+        }}
+        .login-title {{
+            font-family: 'EB Garamond', 'Garamond', 'Georgia', serif;
+            font-size: 2.4em;
+            font-weight: 700;
+            color: #ffffff;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+        }}
+        .login-sub {{
+            font-family: 'EB Garamond', 'Garamond', 'Georgia', serif;
+            font-style: italic;
+            font-size: 1em;
+            color: {ICE_LIGHT_BLUE};
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 32px;
+        }}
+        .login-hint {{
+            text-align: center;
+            color: #9ebbd0;
+            font-size: 0.85em;
+            font-style: italic;
+            margin-bottom: 22px;
+        }}
+        /* Text inputs — the background lives on the wrapper div, not the <input> */
+        .stTextInput [data-baseweb="base-input"],
+        .stTextInput [data-baseweb="input"] {{
+            background-color: rgba(10, 22, 40, 0.75) !important;
+            border: 1px solid rgba(113, 197, 232, 0.5) !important;
+            border-radius: 6px !important;
+        }}
+        .stTextInput [data-baseweb="base-input"]:focus-within,
+        .stTextInput [data-baseweb="input"]:focus-within {{
+            border-color: {ICE_LIGHT_BLUE} !important;
+            box-shadow: 0 0 0 2px rgba(113, 197, 232, 0.28) !important;
+        }}
+        .stTextInput input {{
+            background-color: transparent !important;
+            color: #ffffff !important;
+            caret-color: {ICE_LIGHT_BLUE} !important;
+            padding: 12px !important;
+            font-size: 1em !important;
+            -webkit-text-fill-color: #ffffff !important;
+        }}
+        .stTextInput input::placeholder {{
+            color: #7a95ad !important;
+            -webkit-text-fill-color: #7a95ad !important;
+        }}
+        .stTextInput label, .stTextInput label p {{
+            color: #c8deec !important;
+            font-size: 0.9em !important;
+            font-weight: 500 !important;
+        }}
+        /* Password reveal eye icon */
+        .stTextInput button {{
+            background-color: transparent !important;
+            color: #9ebbd0 !important;
+        }}
+        /* Form submit button — this is the fix: target stFormSubmitButton, not stButton */
+        [data-testid="stFormSubmitButton"] > button {{
+            background: linear-gradient(135deg, {ICE_TEAL} 0%, {ICE_LIGHT_BLUE} 100%) !important;
+            color: #ffffff !important;
+            border: none !important;
+            font-weight: 700 !important;
+            font-size: 1.05em !important;
+            letter-spacing: 1.5px !important;
+            text-transform: uppercase;
+            padding: 14px !important;
+            margin-top: 10px !important;
+            box-shadow: 0 4px 18px rgba(35, 95, 115, 0.5);
+            transition: all 0.2s ease;
+        }}
+        [data-testid="stFormSubmitButton"] > button:hover {{
+            filter: brightness(1.18);
+            box-shadow: 0 6px 24px rgba(113, 197, 232, 0.6);
+            transform: translateY(-1px);
+        }}
+        [data-testid="stFormSubmitButton"] > button p {{
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }}
+        /* Alert boxes — readable on dark background */
+        [data-testid="stAlert"] {{
+            background-color: rgba(198, 40, 40, 0.18) !important;
+            border: 1px solid rgba(255, 120, 120, 0.5) !important;
+            border-radius: 8px !important;
+            margin-top: 14px !important;
+        }}
+        [data-testid="stAlert"] [data-testid="stAlertContentError"] * {{
+            color: #ffc8c8 !important;
+            font-weight: 500 !important;
+        }}
+        [data-testid="stAlert"] [data-testid="stAlertContentSuccess"] * {{
+            color: #b8f0c8 !important;
+            font-weight: 500 !important;
+        }}
+        [data-testid="stAlert"] svg {{ fill: #ffc8c8 !important; }}
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="login-title">ICE QAgent</div>'
+        '<div class="login-sub">Internal Onboarding Assistant</div>'
+        '<div class="login-hint">Enter any username and password — we\'ll remember you next time.</div>',
+        unsafe_allow_html=True,
+    )
+
+    with st.form("signin_form", clear_on_submit=False):
+        username = st.text_input(
+            "Username",
+            key="signin_user",
+            placeholder="your.name",
+        )
+        password = st.text_input(
+            "Password",
+            type="password",
+            key="signin_pw",
+            placeholder="Minimum 4 characters",
+        )
+        submitted = st.form_submit_button("Continue", use_container_width=True)
+        if submitted:
+            user, msg = auth_login_or_create(username, password)
+            if user:
+                import uuid as _uuid
+                st.session_state.user = user
+                st.session_state.session_id = str(_uuid.uuid4())[:8]
+                st.session_state.messages = []
+                st.rerun()
+            else:
+                st.error(msg)
+
+    st.markdown(
+        '<div style="text-align:center; margin-top:28px; color:#7a95ad; '
+        'font-size:0.75em; letter-spacing:1.5px;">'
+        'INTERCONTINENTAL EXCHANGE · SECURE INTERNAL ACCESS'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+
+if st.session_state.user is None:
+    render_login_page()
+    st.stop()
+
+
+# ══════════════════════════════════════════════════════════════════════
+# VOICE RESULT HANDLER
+# ══════════════════════════════════════════════════════════════════════
+# The mic component (rendered by render_voice_mic) captures audio, sends
+# it through Groq Whisper, and returns a parsed command dict. We mutate
+# session_state here, then rerun so the UI reflects the new state.
+
+def _handle_voice_result(result):
+    import uuid as _uuid
+    if not result:
+        return
+
+    if result.get("action") == "query":
+        text = (result.get("text") or "").strip()
+        if not text:
+            return
+        st.session_state.sample_query = text
+        st.session_state["_speak_next"] = True
+        if st.session_state.current_page != "chat":
+            st.session_state.current_page = "chat"
+            st.session_state.active_agent = st.session_state.active_agent or "master"
+            st.session_state.messages = []
+            st.session_state.session_id = str(_uuid.uuid4())[:8]
+        st.rerun()
+        return
+
+    if result.get("action") == "nav":
+        target = result.get("target")
+        if target == "dashboard":
+            st.session_state.current_page = "dashboard"
+            st.session_state.active_agent = None
+        elif target in ("hr", "qa", "security"):
+            st.session_state.current_page = "chat"
+            st.session_state.active_agent = target
+            st.session_state.messages = []
+            st.session_state.session_id = str(_uuid.uuid4())[:8]
+        elif target == "history":
+            st.session_state.current_page = "history"
+            st.session_state.history_view_session = None
+        elif target == "new_chat":
+            st.session_state.current_page = "chat"
+            st.session_state.active_agent = "master"
+            st.session_state.messages = []
+            st.session_state.session_id = str(_uuid.uuid4())[:8]
+        elif target == "logout":
+            st.session_state.user = None
+            st.session_state.messages = []
+            st.session_state.current_page = "dashboard"
+            st.session_state.active_agent = None
+            st.session_state.session_id = str(_uuid.uuid4())[:8]
+            st.session_state.history_view_session = None
+        st.rerun()
+
+
 # ── Sidebar Navigation ───────────────────────────────────────────────
 
 with st.sidebar:
@@ -407,6 +698,28 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
+    _u = st.session_state.user
+    st.markdown(f"""
+    <div style="padding: 10px 14px; margin-bottom: 8px;
+                background: rgba(113, 197, 232, 0.08);
+                border: 1px solid rgba(113, 197, 232, 0.25);
+                border-radius: 8px;">
+        <div style="font-size: 0.7em; color: #71C5E8; letter-spacing: 1px;">SIGNED IN</div>
+        <div style="font-size: 1em; color: #ffffff; font-weight: 600; margin-top: 2px;">{_u['full_name']}</div>
+        <div style="font-size: 0.78em; color: #a0c0d8; font-style: italic;">{_u['role']} · {_u['department'] or '—'}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.button("🚪  Log Out", key="nav_logout", use_container_width=True):
+        import uuid as _uuid
+        st.session_state.user = None
+        st.session_state.messages = []
+        st.session_state.current_page = "dashboard"
+        st.session_state.active_agent = None
+        st.session_state.session_id = str(_uuid.uuid4())[:8]
+        st.session_state.history_view_session = None
+        st.rerun()
+
     st.divider()
 
     if st.button("📊  Dashboard", key="nav_dashboard", use_container_width=True):
@@ -418,6 +731,12 @@ with st.sidebar:
         st.session_state.current_page = "chat"
         st.session_state.active_agent = "master"
         st.session_state.messages = []
+        st.session_state.session_id = str(uuid.uuid4())[:8]
+        st.rerun()
+
+    if st.button("📜  History", key="nav_history", use_container_width=True):
+        st.session_state.current_page = "history"
+        st.session_state.history_view_session = None
         st.rerun()
 
     st.divider()
@@ -428,18 +747,21 @@ with st.sidebar:
         st.session_state.current_page = "chat"
         st.session_state.active_agent = "qa"
         st.session_state.messages = []
+        st.session_state.session_id = str(uuid.uuid4())[:8]
         st.rerun()
 
     if st.button("👥  HR & Onboarding Agent", key="nav_hr", use_container_width=True):
         st.session_state.current_page = "chat"
         st.session_state.active_agent = "hr"
         st.session_state.messages = []
+        st.session_state.session_id = str(uuid.uuid4())[:8]
         st.rerun()
 
     if st.button("🛡️  Security Guardrail", key="nav_security", use_container_width=True):
         st.session_state.current_page = "chat"
         st.session_state.active_agent = "security"
         st.session_state.messages = []
+        st.session_state.session_id = str(uuid.uuid4())[:8]
         st.rerun()
 
     st.divider()
@@ -554,8 +876,10 @@ def process_and_render(prompt: str):
         with st.spinner("🧊 Routing query through ICE QAgent..."):
             result = run_agent(prompt, chat_history=chat_history, forced_intent=forced_intent)
         render_response(result)
+        if st.session_state.pop("_speak_next", False):
+            speak_text(result.get("response", ""))
 
-    st.session_state.messages.append({
+    msg = {
         "role": "assistant",
         "content": result.get("response", ""),
         "agent": result.get("agent", ""),
@@ -564,7 +888,22 @@ def process_and_render(prompt: str):
         "confidence": result.get("confidence", 0.0),
         "tool_calls": result.get("tool_calls", []),
         "reasoning_trace": result.get("reasoning_trace", []),
-    })
+    }
+    st.session_state.messages.append(msg)
+
+    # Persist to chat history
+    user = st.session_state.get("user")
+    if user:
+        save_exchange(
+            username=user["username"],
+            session_id=st.session_state.session_id,
+            user_query=prompt,
+            assistant_response=result.get("response", ""),
+            agent=result.get("agent", ""),
+            confidence=result.get("confidence", 0.0),
+            sources=result.get("sources", []),
+            used_web_search=result.get("used_web_search", False),
+        )
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -589,6 +928,7 @@ def render_dashboard():
     _ARR_S = '<div style="color:#8aa4b8; font-size:1.3em; padding:0 5px;">&#10142;</div>'
 
     st.markdown(f'<div class="section-header">Complete Project Pipeline</div>', unsafe_allow_html=True)
+    st.markdown('<div class="ice-pipeline">', unsafe_allow_html=True)
 
     # Section 1: User Interface Layer
     st.markdown(f"""<div style="{_PB}">
@@ -771,6 +1111,7 @@ def render_dashboard():
       </div>
     </div>
     </div>""", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # ── Information Security Levels ──────────────────────────────────
     st.markdown(f"""
@@ -841,6 +1182,7 @@ def render_dashboard():
                 st.session_state.current_page = "chat"
                 st.session_state.active_agent = "master"
                 st.session_state.messages = []
+                st.session_state.session_id = str(uuid.uuid4())[:8]
                 st.session_state.sample_query = q
                 st.rerun()
     with q2:
@@ -854,6 +1196,7 @@ def render_dashboard():
                 st.session_state.current_page = "chat"
                 st.session_state.active_agent = "master"
                 st.session_state.messages = []
+                st.session_state.session_id = str(uuid.uuid4())[:8]
                 st.session_state.sample_query = q
                 st.rerun()
     with q3:
@@ -867,6 +1210,7 @@ def render_dashboard():
                 st.session_state.current_page = "chat"
                 st.session_state.active_agent = "master"
                 st.session_state.messages = []
+                st.session_state.session_id = str(uuid.uuid4())[:8]
                 st.session_state.sample_query = q
                 st.rerun()
 
@@ -905,10 +1249,15 @@ def render_chat():
         """, unsafe_allow_html=True)
         st.caption(f"Direct connection — all queries go to {agent_info['name']}, bypassing the intent agent.")
 
-    # Back to dashboard button
-    if st.button("← Back to Dashboard", key="back_dash"):
-        st.session_state.current_page = "dashboard"
-        st.rerun()
+    # Back to dashboard button + voice mic (right-aligned)
+    back_col, mic_col = st.columns([5, 1])
+    with back_col:
+        if st.button("← Back to Dashboard", key="back_dash"):
+            st.session_state.current_page = "dashboard"
+            st.rerun()
+    with mic_col:
+        _voice_result = render_voice_mic(key=f"mic_{st.session_state.active_agent or 'master'}")
+        _handle_voice_result(_voice_result)
 
     st.divider()
 
@@ -1048,6 +1397,117 @@ def render_test():
 
 
 # ══════════════════════════════════════════════════════════════════════
+# PAGE: HISTORY
+# ══════════════════════════════════════════════════════════════════════
+
+def render_history():
+    """Show the user's past conversations with browsable detail view."""
+    user = st.session_state.get("user")
+    if not user:
+        st.warning("Please log in to view history.")
+        return
+
+    viewing = st.session_state.get("history_view_session")
+
+    if viewing:
+        # ── Detail view: show a specific past conversation ──
+        session = get_session_detail(user["username"], viewing)
+        if not session:
+            st.error("Session not found.")
+            return
+
+        col_back, col_title = st.columns([1, 5])
+        with col_back:
+            if st.button("← Back", key="hist_back"):
+                st.session_state.history_view_session = None
+                st.rerun()
+        with col_title:
+            st.markdown(
+                f'<div style="font-size:1.2em; font-weight:700; color:{ICE_LIGHT_BLUE};">{session.get("title", "Conversation")}</div>',
+                unsafe_allow_html=True,
+            )
+
+        created = session.get("created_at", "")[:10]
+        exchange_count = len(session.get("exchanges", []))
+        st.caption(f"{created}  ·  {exchange_count} exchange{'s' if exchange_count != 1 else ''}")
+        st.divider()
+
+        for ex in session.get("exchanges", []):
+            # User message
+            with st.chat_message("user"):
+                st.markdown(ex["query"])
+            # Assistant message
+            with st.chat_message("assistant"):
+                agent = ex.get("agent", "")
+                conf = ex.get("confidence", 0)
+                if agent:
+                    badge_cls = get_resp_badge_class(agent)
+                    st.markdown(
+                        f'<span class="resp-badge {badge_cls}">{agent}</span>'
+                        f'<span style="font-size:0.7em; color:#8aa4b8; margin-left:8px;">'
+                        f'Confidence: {conf:.0%}</span>',
+                        unsafe_allow_html=True,
+                    )
+                st.markdown(ex["response"])
+                srcs = ex.get("sources", [])
+                if srcs:
+                    st.caption("Sources: " + ", ".join(srcs))
+
+        st.divider()
+        if st.button("🗑️  Delete this conversation", key="hist_delete"):
+            delete_session(user["username"], viewing)
+            st.session_state.history_view_session = None
+            st.rerun()
+    else:
+        # ── List view: show all past sessions ──
+        st.markdown(
+            f'<div class="section-header">📜 Conversation History</div>',
+            unsafe_allow_html=True,
+        )
+
+        sessions = get_sessions(user["username"])
+
+        if not sessions:
+            st.markdown(
+                '<div style="text-align:center; padding:60px 20px; color:#8aa4b8; font-size:1.1em;">'
+                'No conversations yet. Start chatting to build your history!'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+            if st.button("← Back to Dashboard", key="hist_back_empty"):
+                st.session_state.current_page = "dashboard"
+                st.rerun()
+            return
+
+        for sess in sessions:
+            created = sess.get("created_at", "")[:10]
+            updated = sess.get("last_updated", "")[:10]
+            count = sess.get("exchange_count", 0)
+            title = sess.get("title", "Untitled")
+
+            st.markdown(f"""
+            <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(113,197,232,0.2);
+                        border-radius:10px; padding:16px 20px; margin-bottom:10px;
+                        cursor:pointer;">
+                <div style="font-weight:600; color:#e0eaf4; font-size:0.95em;">💬 {title}</div>
+                <div style="font-size:0.75em; color:#8aa4b8; margin-top:4px;">
+                    {created} &nbsp;·&nbsp; {count} exchange{'s' if count != 1 else ''}
+                    &nbsp;·&nbsp; Last updated {updated}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            if st.button("View", key=f"hist_view_{sess['session_id']}", use_container_width=True):
+                st.session_state.history_view_session = sess["session_id"]
+                st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("← Back to Dashboard", key="hist_back_list"):
+            st.session_state.current_page = "dashboard"
+            st.rerun()
+
+
+# ══════════════════════════════════════════════════════════════════════
 # ROUTER
 # ══════════════════════════════════════════════════════════════════════
 
@@ -1057,6 +1517,8 @@ if page == "dashboard":
     render_dashboard()
 elif page == "chat":
     render_chat()
+elif page == "history":
+    render_history()
 elif page == "ingest":
     render_ingest()
 elif page == "test":
