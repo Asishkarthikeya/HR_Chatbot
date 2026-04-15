@@ -2,18 +2,30 @@
 
 # ICE QAgent — Agentic RAG Onboarding Assistant
 
-An intelligent, multi-agent onboarding assistant for the Intercontinental Exchange (ICE) QA Automation team. Built with **Agentic RAG** and **LangGraph** multi-agent orchestration with enterprise security guardrails.
+An intelligent, multi-agent onboarding assistant for the Intercontinental Exchange (ICE) QA Automation team. Built with **Agentic RAG** over a **LangGraph** multi-agent state machine, exposed through a **FastAPI** backend and a **React + Vite + TypeScript** frontend, with enterprise security guardrails, contextual retrieval, and multi-provider LLM failover.
+
+A legacy **Streamlit** UI (`app.py`) is still included for the Hugging Face Space deployment.
+
+## What's new
+
+- ⚛️ **React + TypeScript frontend** (`frontend/`) — login, dashboard, per-agent chat, history, dark/light theme, voice input via Web Speech API, and a full 8-section pipeline diagram.
+- 🚀 **FastAPI backend** (`api.py`) — a thin async wrapper around the LangGraph pipeline with CORS, Pydantic validation, and threadpool offload so the sync graph call doesn't block the event loop.
+- 🧭 **Auto-routing entry point** — the `master` agent lets the intent classifier decide which specialist handles each query; `hr`, `qa`, and `security` remain as forced-intent shortcuts.
+- 🔐 **Modular auth + chat history + voice** (`src/auth.py`, `src/chat_history.py`, `src/voice_agent.py`) reusable across the Streamlit and FastAPI entry points.
 
 ## Complete Pipeline
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  1. USER INTERFACE (Streamlit)                                      │
-│     Dashboard → Chat (Master/Specialist) → Admin (Ingest/Test)      │
+│  1. USER INTERFACE                                                  │
+│     React + Vite (frontend/)  ─┐                                    │
+│     Legacy Streamlit (app.py)  ├─▶  FastAPI (api.py) /api/chat      │
+│                                 │                                   │
+│     Dashboard • Chat • History • Voice (Web Speech) • Theme toggle │
 └──────────────────────────────┬──────────────────────────────────────┘
                                ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  2. MULTI-AGENT ORCHESTRATION (LangGraph)                           │
+│  2. MULTI-AGENT ORCHESTRATION (LangGraph — src/graph.py)            │
 │                                                                     │
 │  User Query → Pre-Routing Guardrail → Intent Agent (LLM Classifier) │
 │                (Regex • Injection      (Routes to specialist)       │
@@ -21,83 +33,93 @@ An intelligent, multi-agent onboarding assistant for the Intercontinental Exchan
 │                      │                                              │
 │           ┌──────────┼──────────────┐                               │
 │           ▼          ▼              ▼                               │
-│     HR & Onboarding  QA Expert   Security                          │
-│       Agent          Agent       Guardrail                         │
+│     HR & Onboarding  QA Expert   Security                           │
+│       Agent          Agent       Guardrail                          │
+│                                                                     │
+│     + Greeting Node  + Out-of-Scope Node  (no RAG, direct LLM)      │
 └──────────────────────┬──────────────────────────────────────────────┘
                        ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  3. SPECIALIST AGENTS (ReAct Reasoning)                             │
 │                                                                     │
 │  QA Expert Agent          HR & Onboarding Agent   Security Guardrail│
-│  • search_internal_docs() • check_sensitivity()   • 8 credential   │
+│  • search_internal_docs() • check_sensitivity()   • credential     │
 │  • evaluate_relevance()   • search_hr_docs()        regex patterns │
-│  • search_web() (Tavily)  • assess_confidence()   • 5 MNPI patterns│
-│  • synthesize()           • extract_citations()   • 7 injection    │
-│  Web fallback: YES        Web fallback: NO          patterns       │
+│  • search_web() (Tavily)  • assess_confidence()   • MNPI patterns  │
+│  • validate_answer()      • extract_citations()   • injection      │
+│  Web fallback: YES        • validate_answer()       patterns       │
+│                           Web fallback: NO                          │
 └──────────────────────┬──────────────────────────────────────────────┘
                        ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  4. RAG PIPELINE (6-stage retrieval)                                │
+│  4. ADVANCED RAG PIPELINE (src/retriever.py)                        │
 │                                                                     │
-│  LLM Query    Semantic    Keyword    Cross-Encoder   LLM-as-Judge  │
-│  Expansion → Search    → Boost    → Re-Rank       → Relevance     │
-│  (Colloquial  (ChromaDB   (Hybrid    (ms-marco-      (Confidence   │
-│   → Formal)    + MiniLM)   Scoring)   MiniLM-L12)     Check)       │
-│                                                          ↓         │
-│                                                     ReAct Synthesis │
-│                                                     (Cited Answer)  │
+│  Conversation    LLM Query    Semantic    Keyword    Cross-Encoder  │
+│  Reformulation → Expansion →  Search   →  Boost   →  Re-Rank        │
+│  (Follow-up      (Colloquial  (ChromaDB   (Hybrid    (FlashRank     │
+│   → standalone)   → formal)    + MiniLM)   Scoring)   ms-marco)     │
+│                                                          ↓          │
+│                                                    ReAct Synthesis  │
+│                                                    + Self-Validate  │
 └──────────────────────┬──────────────────────────────────────────────┘
                        ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  5. DATA & KNOWLEDGE SOURCES                                        │
 │                                                                     │
-│  HR Docs (4 files)     QA Docs (6 files)      Tavily Web Search    │
+│  HR Docs (6 files)     QA Docs (7 files)      Tavily Web Search    │
 │  • Employee Handbook   • Automation Standards  • QA Agent fallback  │
-│  • Onboarding Guide    • Test Environment      • 3 results max     │
-│  • Office Info         • API & FIX Testing     • AI summary        │
-│  • Code of Conduct     • Deployment Pipeline                       │
+│  • Benefits Guide      • Test Environment      • 3 results max     │
+│  • Code of Conduct     • API & FIX Testing     • AI summary        │
+│  • New Hire FAQ        • Deployment Pipeline   • Only when local   │
+│  • Office Info         • Team Structure          confidence < 0.7  │
+│  • Onboarding Checklist• Clearing Standards                        │
 └──────────────────────┬──────────────────────────────────────────────┘
                        ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  6. LLM INFRASTRUCTURE (Waterfall Fallback)                         │
+│  6. LLM INFRASTRUCTURE (Waterfall Fallback — src/config.py)         │
 │                                                                     │
-│  Primary: Google Gemini          Secondary: Groq (Llama)           │
-│  gemini-2.0-flash (default)      llama-3.3-70b-versatile           │
-│  gemini-2.0-flash-lite           llama-3.1-8b-instant              │
-│  gemini-2.5-flash-preview        llama-3.2-90b-vision              │
-│  gemini-2.5-pro-preview          mixtral-8x7b-32768               │
-│  gemini-1.5-flash/pro            gemma2-9b-it                     │
+│  Groq (Llama)                   Google Gemini                       │
+│  llama-3.3-70b-versatile        gemini-2.0-flash                    │
+│  llama-3.1-8b-instant           gemini-2.0-flash-lite               │
+│  llama-4-scout-17b                                                  │
+│  qwen3-32b                                                          │
 │                                                                     │
-│  Auto-fallback on: 429 Rate Limit • 404 Not Found • Quota Exceeded │
+│  Auto-fallback on: 429 • quota exhausted • 404 • timeouts           │
+│  60-second cooldown before retrying a failed model                  │
 └──────────────────────┬──────────────────────────────────────────────┘
                        ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│  7. EMBEDDING & VECTOR STORE                                        │
+│  7. EMBEDDING & VECTOR STORE (src/ingest.py)                        │
 │                                                                     │
-│  Markdown → Recursive Chunker → Embed → ChromaDB (Persistent)     │
-│  (.md)      (600 tok/100 overlap) (all-MiniLM-L6-v2, 384-dim)     │
+│  Markdown → Recursive Chunker → Contextual Summary → Embed → Chroma │
+│  (.md)      (600 chars/100       (LLM-generated       (all-MiniLM   │
+│              overlap)              per-chunk context)   L6-v2)       │
 │                                                                     │
-│  Reranker: FlashRank (ms-marco-MiniLM-L-12-v2 cross-encoder)      │
+│  Reranker: FlashRank (ms-marco-MiniLM-L-12-v2 cross-encoder)        │
+│  Context cache: .context_cache/ (skips unchanged chunks)            │
 └──────────────────────┬──────────────────────────────────────────────┘
                        ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │  8. RESPONSE RENDERING                                              │
-│  Agent Badge • Confidence % • Markdown Response • Sources •        │
-│  Reasoning Trace (THINK→ACT→OBSERVE) • Tool Calls                  │
+│  Agent Badge • Intent • Confidence % • Markdown Response • Sources │
+│  • Collapsible Reasoning Trace • Web Search Flag • Guardrail State │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Tech Stack
 
-| Component | Tool |
-|-----------|------|
+| Layer | Tool |
+|-------|------|
+| Frontend | React 18 + Vite 5 + TypeScript + React Router 7 (vanilla CSS, token-based theming) |
+| Voice | Web Speech API (STT) — Groq Whisper (legacy Streamlit) |
+| API | FastAPI + Pydantic + Uvicorn |
 | Orchestration | LangGraph (multi-agent state machine) |
-| LLM | Google Gemini / Groq Llama (waterfall fallback) |
-| Embeddings | all-MiniLM-L6-v2 (384-dim, local) |
-| Reranker | FlashRank ms-marco-MiniLM-L-12-v2 |
-| Vector DB | ChromaDB (2 persistent collections) |
+| LLM | Groq Llama / Google Gemini (waterfall fallback) |
+| Embeddings | all-MiniLM-L6-v2 (384-dim, local HuggingFace) |
+| Reranker | FlashRank ms-marco-MiniLM-L-12-v2 cross-encoder |
+| Vector DB | ChromaDB (persistent, `hr_docs` + `qa_docs` collections) |
 | Web Search | Tavily (QA agent fallback only) |
-| Frontend | Streamlit |
+| Legacy UI | Streamlit 1.35 (for the Hugging Face Space) |
 
 ## Security Classification
 
@@ -106,53 +128,110 @@ An intelligent, multi-agent onboarding assistant for the Intercontinental Exchan
 | Level 1 — Generic | Company policies, office hours | Fully answered |
 | Level 2 — Internal | QA processes, test environments | Answered with citations |
 | Level 3 — Sensitive | Salary, termination, harassment | Answered + HR escalation |
-| Level 4 — Restricted | Credentials, MNPI, API keys | Blocked |
+| Level 4 — Restricted | Credentials, MNPI, API keys | Blocked pre-LLM by guardrail |
 
 ## Setup
 
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Option A — React + FastAPI (modern stack)
 
-2. **Configure API keys:**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys
-   ```
+**Terminal 1 — FastAPI backend:**
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env   # then edit with your API keys
+python -m src.ingest   # one-time: build ChromaDB
+uvicorn api:app --reload --port 8000
+```
 
-3. **Ingest documents into ChromaDB:**
-   ```bash
-   python -m src.ingest
-   ```
+**Terminal 2 — React frontend:**
+```bash
+cd frontend
+npm install
+npm run dev            # opens http://localhost:5173
+```
 
-4. **Run the app:**
-   ```bash
-   streamlit run app.py
-   ```
+The Vite dev server proxies `/api` → `http://127.0.0.1:8000`, so you hit a single URL in the browser.
+
+### Option B — Streamlit (legacy)
+
+```bash
+pip install -r requirements.txt
+cp .env.example .env
+python -m src.ingest
+streamlit run app.py
+```
+
+## Environment Variables
+
+```
+GROQ_API_KEY=gsk_...          # required (Llama models)
+GOOGLE_API_KEY=...            # optional (Gemini fallback)
+TAVILY_API_KEY=tvly-...       # optional (QA agent web search)
+LLM_PROVIDER=groq             # "groq" or "google"
+```
 
 ## Project Structure
 
 ```
-├── data/
-│   ├── hr/              # HR & onboarding documents (4 files)
-│   └── qa/              # QA technical documents (6 files)
-├── src/
-│   ├── config.py        # LLM waterfall fallback + settings
-│   ├── ingest.py        # Document ingestion pipeline
-│   ├── retriever.py     # 6-stage RAG retrieval pipeline
-│   ├── graph.py         # LangGraph multi-agent orchestration
-│   ├── agents/
-│   │   ├── qa_agent.py      # QA Expert Agent (ReAct + web fallback)
-│   │   ├── hr_agent.py      # HR Agent (strict RAG + escalation)
-│   │   └── guardrails.py    # Security guardrail (regex patterns)
-│   └── prompts/
-│       ├── router_prompt.py      # Intent classification
-│       ├── qa_system_prompt.py   # QA engineer persona
-│       └── hr_system_prompt.py   # Nova HR colleague persona
-├── .streamlit/
-│   └── config.toml      # ICE brand theming
-├── app.py               # Streamlit UI (dashboard + chat)
+├── api.py                    # FastAPI /api/chat wrapper around run_agent
+├── app.py                    # Legacy Streamlit UI (Hugging Face Space)
 ├── requirements.txt
-└── .env.example
+├── .env.example
+│
+├── data/
+│   ├── hr/                   # HR & onboarding docs (6 markdown files)
+│   └── qa/                   # QA technical docs (7 markdown files)
+│
+├── src/
+│   ├── config.py             # LLM waterfall + provider settings
+│   ├── ingest.py             # Contextual chunking + embedding pipeline
+│   ├── retriever.py          # 5-stage advanced RAG retrieval
+│   ├── graph.py              # LangGraph multi-agent state machine
+│   ├── auth.py               # ChromaDB-backed user auth (salted SHA-256)
+│   ├── chat_history.py       # Per-user JSON session persistence
+│   ├── voice_agent.py        # Groq Whisper STT + nav command parsing
+│   ├── agents/
+│   │   ├── qa_agent.py       # QA Expert (ReAct + Tavily fallback)
+│   │   ├── hr_agent.py       # Nova HR Agent (strict RAG + escalation)
+│   │   └── guardrails.py     # Pre-routing pattern-based guardrail
+│   └── prompts/
+│       ├── router_prompt.py        # Intent classifier
+│       ├── qa_system_prompt.py     # Senior QA engineer persona
+│       └── hr_system_prompt.py     # Nova HR colleague persona
+│
+├── frontend/                 # React + Vite + TypeScript app
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.ts        # /api proxy → 127.0.0.1:8000
+│   ├── tsconfig.json
+│   ├── public/               # ICE brand assets (logo, backdrops)
+│   └── src/
+│       ├── main.tsx
+│       ├── App.tsx           # Routes + ThemeProvider + AuthProvider
+│       ├── layouts/AppShell.tsx
+│       ├── pages/            # Home, Login, Dashboard, Chat, History
+│       ├── components/       # Sidebar, TopBar, ChatMessage, ChatComposer,
+│       │                     # Pipeline, ThemeToggle, AgentCard, ...
+│       ├── state/            # auth, chat, theme (React Context hooks)
+│       ├── data/             # agents, history, pipeline metadata
+│       ├── styles/           # tokens, reset, layout, per-component CSS
+│       └── types.ts
+│
+└── .streamlit/
+    └── config.toml           # ICE brand theming (legacy Streamlit only)
 ```
+
+## How a query flows through the system
+
+1. **Frontend** (`frontend/src/state/chat.ts`) posts to `/api/chat` with `{query, agent, chat_history}`.
+2. **FastAPI** (`api.py`) validates, maps the UI agent to a forced intent (or auto-route), and offloads to `asyncio.to_thread(run_agent, …)`.
+3. **Pre-routing guardrail** scans for prompt injection, credential, database, and MNPI patterns — blocked queries short-circuit to END with a canned redirect.
+4. **Intent detector** runs greeting regex → forced intent check → agent-switch regex → LLM classifier, outputting one of `hr_general`, `qa_technical`, `sensitive_info`, `greeting`, `out_of_scope`.
+5. **Specialist agent** executes its ReAct loop: search → confidence check → (answer or escalate/fallback) → generate → validate against sources.
+6. **Retriever** reformulates the query with chat context, expands it, runs ChromaDB semantic search, boosts keyword overlap, then re-ranks with FlashRank.
+7. **Response** flows back as `ChatResponse` JSON with intent, confidence, sources, reasoning trace, and guardrail metadata — rendered with collapsible panels in the React `ChatMessage` component.
+
+## License
+
+MIT
